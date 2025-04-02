@@ -14,23 +14,29 @@ class DocumentController extends Controller
     {
         $query = Document::query();
 
-        if ($request->filled('tipo')) {
-            $query->where('tipo', $request->tipo);
-        }
-        if ($request->filled('fecha')) {
-            $query->whereDate('fecha', $request->fecha);
-        }
-        if ($request->filled('nombre')) {
-            $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
-        }
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+    if ($request->filled('tipo')) {
+        $query->where('tipo', $request->tipo);
+    }
+    if ($request->filled('numero')) {
+        $query->where('numero', 'LIKE', '%' . $request->numero . '%');
+    }
+    if ($request->filled('nombre')) {
+        $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
+    }
 
-        $documents = $query->orderBy('fecha', 'desc')->get();
-        $categories = Category::all();
+    // Ordenar según el parámetro 'orden'
+    if ($request->orden === 'numero') {
+        $query->orderBy('numero', 'asc'); // Menor a mayor
+    } elseif ($request->orden === 'nombre') {
+        $query->orderBy('nombre', 'asc'); // A-Z
+    } else {
+        $query->orderBy('fecha', 'desc'); // Default: más recientes primero
+    }
 
-        return view('public.documents', compact('documents', 'categories'));
+    $documents = $query->get();
+    $categories = Category::all();
+
+    return view('public.documents', compact('documents', 'categories'));
     }
 
     // Vista para ver más o descargar documento
@@ -58,29 +64,36 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
             'nombre' => 'required|string|max:255',
-            'tipo' => 'required|in:decreto,resolución',
-            'fecha' => 'required|date',
-            'archivo' => 'required|file|mimes:pdf,doc,docx', // Ajusta los mime types según lo necesites
+            'numero' => 'required|string|max:50',
+            'tipo' => 'required|string',
             'descripcion' => 'nullable|string',
+            'fecha' => 'required|date',
             'category_id' => 'required|exists:categories,id'
         ]);
-
-        // Subir archivo
+    
         if ($request->hasFile('archivo')) {
-            $archivoPath = $request->file('archivo')->store('documents', 'public');
+            $archivo = $request->file('archivo');
+            $nombreOriginal = $archivo->getClientOriginalName(); // Obtener nombre original
+            $nombreLimpio = time() . '_' . str_replace(' ', '_', $nombreOriginal); // Evitar espacios y hacer único
+    
+            $ruta = $archivo->storeAs('documents', $nombreLimpio, 'public'); // Guardar con el mismo nombre
+    
+            $documento = new Document();
+            $documento->nombre = $request->nombre;
+            $documento->numero = $request->numero;
+            $documento->tipo = $request->tipo;
+            $documento->fecha = $request->fecha;
+            $documento->category_id = $request->category_id;
+            $documento->descripcion = $request->descripcion;
+            $documento->archivo = $ruta; // Guardar la ruta en la base de datos
+            $documento->save();
+            
+            return redirect()->back()->with('success', 'Documento subido correctamente.');
         }
-
-        Document::create([
-            'nombre' => $request->nombre,
-            'tipo' => $request->tipo,
-            'fecha' => $request->fecha,
-            'archivo' => $archivoPath,
-            'descripcion' => $request->descripcion,
-            'category_id' => $request->category_id,
-        ]);
-
-        return redirect()->route('dashboard')->with('success', 'Documento subido correctamente');
+    
+        return redirect()->back()->with('error', 'Error al subir el documento.');
     }
 
     // Formulario para editar documento
@@ -98,6 +111,7 @@ class DocumentController extends Controller
 
         $request->validate([
             'nombre' => 'required|string|max:255',
+            'numero' => 'required|string|max:50',
             'tipo' => 'required|in:decreto,resolución',
             'fecha' => 'required|date',
             'archivo' => 'nullable|file|mimes:pdf,doc,docx',
@@ -105,7 +119,7 @@ class DocumentController extends Controller
             'category_id' => 'required|exists:categories,id'
         ]);
 
-        $data = $request->only(['nombre', 'tipo', 'fecha', 'descripcion', 'category_id']);
+        $data = $request->only(['nombre','numero', 'tipo', 'fecha', 'descripcion', 'category_id']);
 
         // Si se sube un nuevo archivo
         if ($request->hasFile('archivo')) {

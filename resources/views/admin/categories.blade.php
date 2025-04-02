@@ -4,53 +4,58 @@
 @section('title', 'Categorías')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h2>Gestión de Categorías</h2>
-    </div>
-    <div class="card-body">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+<div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestión de Categorías</h2>
 
-        <!-- Formulario para agregar categoría -->
-        <form action="{{ route('category.store') }}" method="POST" class="mb-4">
-            @csrf
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nueva Categoría</label>
-                <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Nombre de la categoría">
-                @error('nombre')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Categoría</button>
-        </form>
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-6">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <!-- Listado de categorías -->
-        <table class="table table-bordered">
-            <thead>
+    <!-- Formulario para agregar categoría -->
+    <form action="{{ route('category.store') }}" method="POST" class="mb-6">
+        @csrf
+        <div class="mb-4">
+            <label for="nombre" class="block text-gray-700 font-semibold mb-2">Nueva Categoría</label>
+            <input type="text" name="nombre" id="nombre" placeholder="Nombre de la categoría" 
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300">
+            @error('nombre')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            Agregar Categoría
+        </button>
+    </form>
+
+    <!-- Listado de categorías -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
                 <tr>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Categoría</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($categories as $category)
                 <tr>
-                    <td>{{ $category->nombre }}</td>
-                    <td>
-                        <!-- Eliminar categoría -->
+                    <td class="px-4 py-2 text-gray-800">{{ $category->nombre }}</td>
+                    <td class="px-4 py-2">
                         <form action="{{ route('category.destroy', $category->id) }}" method="POST" 
-                              onsubmit="return confirm('¿Deseas eliminar esta categoría? Se eliminarán documentos relacionados.')">
+                              onsubmit="return confirm('¿Deseas eliminar esta categoría? Se eliminarán documentos relacionados.')" class="inline-block">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                Eliminar
+                            </button>
                         </form>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="2" class="text-center">No hay categorías registradas.</td>
+                    <td colspan="2" class="px-4 py-2 text-center text-gray-600">No hay categorías registradas.</td>
                 </tr>
                 @endforelse
             </tbody>
