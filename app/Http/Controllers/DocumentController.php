@@ -14,29 +14,32 @@ class DocumentController extends Controller
     {
         $query = Document::query();
 
-    if ($request->filled('tipo')) {
-        $query->where('tipo', $request->tipo);
-    }
-    if ($request->filled('numero')) {
-        $query->where('numero', 'LIKE', '%' . $request->numero . '%');
-    }
-    if ($request->filled('nombre')) {
-        $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
-    }
-
-    // Ordenar según el parámetro 'orden'
-    if ($request->orden === 'numero') {
-        $query->orderBy('numero', 'asc'); // Menor a mayor
-    } elseif ($request->orden === 'nombre') {
-        $query->orderBy('nombre', 'asc'); // A-Z
-    } else {
-        $query->orderBy('fecha', 'desc'); // Default: más recientes primero
-    }
-
-    $documents = $query->get();
-    $categories = Category::all();
-
-    return view('public.documents', compact('documents', 'categories'));
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+        if ($request->filled('numero')) {
+            $query->where('numero', 'LIKE', '%' . $request->numero . '%');
+        }
+        if ($request->filled('nombre')) {
+            $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
+        }
+        if ($request->filled('fecha')) {
+            $query->whereDate('fecha', $request->fecha); // 🔹 Corrección aquí
+        }
+    
+        // Ordenar según el parámetro 'orden'
+        if ($request->orden === 'numero') {
+            $query->orderBy('numero', 'asc'); // Menor a mayor
+        } elseif ($request->orden === 'nombre') {
+            $query->orderBy('nombre', 'asc'); // A-Z
+        } else {
+            $query->orderBy('fecha', 'desc'); // Default: más recientes primero
+        }
+    
+        $documents = $query->get();
+        $categories = Category::all();
+    
+        return view('public.documents', compact('documents', 'categories'));
     }
 
     // Vista para ver más o descargar documento
