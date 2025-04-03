@@ -20,9 +20,10 @@
             {{ ucfirst($document->tipo) }} N° {{ $document->numero }} - {{ $document->nombre }}
         </h1>
 
+    
         <!-- Fecha de expedición y categoría -->
         <p class="text-lg font-semibold text-blue-700 mb-2">
-            Fecha de expedición: {{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('Y/m/d H:i:s') }}
+            Fecha de expedición: {{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
         </p>
         <p class="text-md font-semibold text-gray-700 mb-4">
             Categoría: {{ $document->category->nombre }}
