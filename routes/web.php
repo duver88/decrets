@@ -5,7 +5,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Middleware\IsAdmin; // Asegúrate de importar el middleware
+use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\UserCategoryPermissionController;  
+
 
 // Ruta pública: Vista de documentos para los usuarios
 Route::get('/', [DocumentController::class, 'listPublic'])->name('home');
@@ -44,4 +46,28 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         Route::post('/login', [AuthenticatedSessionController::class, 'store']);
     }); 
 
-    
+    // Rutas para gestionar permisos de usuarios (solo admin)  
+Route::middleware(['auth', IsAdmin::class])->group(function () {  
+    Route::get('/dashboard/permisos', [UserCategoryPermissionController::class, 'index'])  
+         ->name('permissions.index');  
+    Route::post('/dashboard/permisos', [UserCategoryPermissionController::class, 'store'])  
+         ->name('permissions.store');  
+    Route::delete('/dashboard/permisos/{id}', [UserCategoryPermissionController::class, 'destroy'])  
+         ->name('permissions.destroy');  
+});  
+  
+// Rutas para usuarios normales  
+Route::middleware(['auth'])->group(function () {  
+    Route::get('/users/dashboard', [DocumentController::class, 'index'])  
+         ->name('user.dashboard');  
+    Route::get('/users/dashboard/documento/crear', [DocumentController::class, 'create'])  
+         ->name('user.document.create');  
+    Route::post('/users/dashboard/documento', [DocumentController::class, 'store'])  
+         ->name('user.document.store');  
+    Route::get('/users/dashboard/documento/{id}/editar', [DocumentController::class, 'edit'])  
+         ->name('user.document.edit');  
+    Route::put('/users/dashboard/documento/{id}', [DocumentController::class, 'update'])  
+         ->name('user.document.update');  
+    Route::delete('/users/dashboard/documento/{id}', [DocumentController::class, 'destroy'])  
+         ->name('user.document.destroy');  
+});

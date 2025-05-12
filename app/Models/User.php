@@ -45,4 +45,27 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+        public function categoryPermissions()  
+    {  
+        return $this->hasMany(UserCategoryPermission::class);  
+    }  
+
+        public function categories()  
+    {  
+        return $this->belongsToMany(Category::class, 'user_category_permissions')  
+                    ->withPivot(['can_create', 'can_edit', 'can_delete']);  
+    }  
+        public function hasPermissionFor($categoryId, $permission)  
+    {  
+        $categoryPermission = $this->categoryPermissions()  
+                                   ->where('category_id', $categoryId)  
+                                   ->first();  
+          
+        if (!$categoryPermission) {  
+            return false;  
+        }  
+          
+        return $categoryPermission->{'can_' . $permission} === true;  
+    }  
 }
