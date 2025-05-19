@@ -22,7 +22,7 @@
         <thead>
             <tr class="bg-gray-100">
                 <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Categoría</th>
-                <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Título</th>
+                <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Fecha Del Documento</th>
                 <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Número</th>
                 <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Fecha</th>
                 <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-600">Tipo</th>

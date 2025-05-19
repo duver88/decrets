@@ -26,17 +26,27 @@
 <body class="font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar fixed z-40 inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto">
-      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
-        <button class="md:hidden focus:outline-none" onclick="toggleSidebar()">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <nav class="mt-6">
-        <ul class="space-y-2">
+
+    <!-- Sidebar -->
+
+    <!-- Sidebar -->
+<aside id="sidebar" class="sidebar fixed z-40 inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto">
+  <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
+    <button class="md:hidden focus:outline-none" onclick="toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="mt-6">
+    <ul class="space-y-2">
+      <!-- Sección: Relatoría actos administrativos -->
+      <li>
+        <div class="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Relatoría actos administrativos
+        </div>
+        <ul class="pl-2">
           <li>
             <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" viewBox="0 0 20 20" fill="currentColor">
@@ -61,32 +71,77 @@
               <span>Categorías</span>
             </a>
           </li>
-
           @if(auth()->user()->is_admin)  
-            <li>  
-              <a href="{{ route('permissions.index') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">  
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>  
-                </svg>  
-                <span>Asignar Categorías</span>  
-              </a>  
-            </li>  
-            @endif
-
-          <li class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-            <form method="POST" action="{{ route('logout') }}" id="logout-form">
-              @csrf
-              <button type="submit" class="flex items-center w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 transition-colors rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/>
-                </svg>
-                <span>Cerrar sesión</span>
-              </button>
-            </form>
-          </li>
+          <li>  
+            <a href="{{ route('permissions.index') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">  
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>  
+              </svg>  
+              <span>Asignar Categorías</span>  
+            </a>  
+          </li>  
+          @endif
         </ul>
-      </nav>
-    </aside>
+      </li>
+      
+      <!-- Sección: Relatoría conceptos -->
+      <li class="mt-4">
+        <div class="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Relatoría conceptos
+        </div>
+        <ul class="pl-2">
+          <li>
+            <a href="{{ route('concepts.index') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+              </svg>
+              <span>Inicio Conceptos</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('concepts.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Crear Concepto</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('concepts.categories') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+              <span>Categorías Conceptos</span>
+            </a>
+          </li>
+          @if(auth()->user()->is_admin)  
+          <li>  
+            <a href="{{ route('concepts.permissions') }}" class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded">  
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>  
+              </svg>  
+              <span>Asignar Categorías Conceptos</span>  
+            </a>  
+          </li>  
+          @endif
+        </ul>
+      </li>
+
+      <!-- Cerrar sesión -->
+      <li class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+        <form method="POST" action="{{ route('logout') }}" id="logout-form">
+          @csrf
+          <button type="submit" class="flex items-center w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 transition-colors rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/>
+            </svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
+      </li>
+    </ul>
+  </nav>
+</aside>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col ml-0 md:ml-64 transition-all duration-300">

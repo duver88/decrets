@@ -207,7 +207,7 @@
                 $extension = strtolower(pathinfo($document->archivo, PATHINFO_EXTENSION));
                 $iconClass = '';
                 $svgIcon = '';
-
+        
                 if ($extension == 'pdf') {
                     $iconClass = 'text-danger';
                     $svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="currentColor" viewBox="0 0 16 16">
@@ -232,9 +232,10 @@
                     </svg>';
                 }
                 @endphp
-
+        
                 <article class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded overflow-hidden transition-all" style="transition: all 0.3s ease;">
+                    <div class="card h-100 border-0 shadow rounded overflow-hidden transition-all hover:shadow-lg" 
+                         style="transition: all 0.3s ease; background-color: #f9f9f9;">
                         <div class="d-flex align-items-center p-3 gap-3">
                             <div class="flex-shrink-0 text-center" style="width: 70px;">
                                 <div class="{{ $iconClass }}">
@@ -242,11 +243,12 @@
                                 </div>
                                 <span class="visually-hidden">{{ strtoupper($extension) }} archivo</span>
                             </div>
-
+        
                             <div class="flex-grow-1">
                                 <h3 class="h6 mb-2">
                                     <a href="{{ asset('storage/' . $document->archivo) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold" style="color: #43883d;">
-                                        {{ ucfirst($document->tipo) }} {{ $document->numero }} - {{ $document->nombre }}
+                                        {{ ucfirst($document->tipo) }}: No {{ $document->numero }} de {{ $document->nombre }}
+                                        
                                     </a>
                                 </h3>
                                 <p class="text-muted small mb-2">{{ Str::limit($document->descripcion, 110) }}</p>
@@ -278,6 +280,8 @@
                 </article>
             @endforeach
         </div>
+
+        
 
     </div>
 

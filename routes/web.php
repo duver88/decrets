@@ -71,3 +71,25 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/users/dashboard/documento/{id}', [DocumentController::class, 'destroy'])  
          ->name('user.document.destroy');  
 });
+
+// Rutas para conceptos
+Route::middleware(['auth'])->prefix('concepts')->name('concepts.')->group(function () {
+    Route::get('/', function () {
+        return view('concepts.index');
+    })->name('index');
+    
+    Route::get('/create', function () {
+        return view('concepts.create_document');
+    })->name('create');
+    
+    Route::get('/categories', function () {
+        return view('concepts.categories');
+    })->name('categories');
+    
+    // Solo administradores
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/permissions', function () {
+            return view('concepts.user_permissions');
+        })->name('permissions');
+    });
+});

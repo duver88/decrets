@@ -31,8 +31,13 @@
         </div>
 
         <div>
-            <label for="nombre" class="block text-sm font-medium text-gray-700">Título</label>
-            <input type="text" name="nombre" id="nombre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required value="{{ old('nombre') }}">
+            <label for="nombre" class="block text-sm font-medium text-gray-700">Año</label>
+            <select name="nombre" id="nombre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                <option value="">Selecciona el año</option>
+                @foreach(range(2022, 2027) as $year)
+                    <option value="{{ $year }}" {{ old('nombre') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                @endforeach
+            </select>
             @error('nombre')
                 <p class="text-red-500 text-sm">{{ $message }}</p>
             @enderror
@@ -47,7 +52,7 @@
         </div>
 
         <div>
-            <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
+            <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha Del Documento```</label>
             <input type="date" name="fecha" id="fecha" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required value="{{ old('fecha') }}">
             @error('fecha')
                 <p class="text-red-500 text-sm">{{ $message }}</p>
