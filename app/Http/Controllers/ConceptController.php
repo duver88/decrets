@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Concept;
+use App\Models\ConceptType;
+use App\Models\ConceptTheme;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class ConceptController extends Controller
+{
+   // Lista de conceptos
+    public function index()
+    {
+        if (auth()->user()->is_admin) {
+            // Admin ve todos los conceptos
+            $concepts = Concept::with(['conceptType', 'conceptTheme', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Usuarios regulares ven conceptos según permisos
+            $conceptTypeIds = auth()->user()->conceptTypes()
+                ->pluck('concept_types.id')
+                ->toArray();
+            
+            $concepts = Concept::with(['conceptType', 'conceptTheme', 'user'])
+                ->whereIn('concept_type_id', $conceptTypeIds)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('admin.concepts.index', compact('concepts'));
+    }
+
+    // Formulario para crear concepto
+// ConceptController.php - actualiza el método create
+public function create(Request $request)
+{
+    if (auth()->user()->is_admin) {
+        $conceptTypes = ConceptType::all();
+    } else {
+        $conceptTypeIds = auth()->user()->conceptTypes()
+            ->wherePivot('can_create', true)
+            ->pluck('concept_types.id')
+            ->toArray();
+        
+        $conceptTypes = ConceptType::whereIn('id', $conceptTypeIds)->get();
+        
+        if ($conceptTypes->isEmpty()) {
+            return redirect()->route('concepts.index')
+                ->with('error', 'No tienes permiso para crear conceptos');
+        }
+    }
+    
+    // Cargar todos los tipos con sus temas usando la relación directa
+    $conceptTypesWithThemes = ConceptType::with('themes')->get();
+    
+    // Crear un arreglo asociativo de tipos y sus temas para usar
+    $themesForTypes = [];
+    foreach ($conceptTypesWithThemes as $type) {
+        $themesForTypes[$type->id] = $type->themes;
+    }
+    
+    // El tipo seleccionado actualmente
+    $selectedTypeId = $request->query('concept_type_id');
+    
+    return view('admin.concepts.create_document', compact('conceptTypes', 'themesForTypes', 'selectedTypeId'));
+}
+
+    // Obtener temas por AJAX
+    public function getThemes($typeId)
+    {
+        $themes = ConceptTheme::where('concept_type_id', $typeId)->get();
+        return response()->json($themes);
+    }
+
+    // Guardar concepto
+    public function store(Request $request)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'nullable|string',
+            'concept_type_id' => 'required|exists:concept_types,id',
+            'concept_theme_id' => 'required|exists:concept_themes,id',
+            'año' => 'required|string|max:4',
+            'fecha' => 'required|date',
+            'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
+        ]);
+
+        // Verificar permiso
+        if (!auth()->user()->is_admin && 
+            !auth()->user()->hasConceptPermissionFor($request->concept_type_id, 'create')) {
+            return redirect()->back()
+                ->with('error', 'No tienes permiso para crear conceptos en esta categoría');
+        }
+
+        // Procesar archivo
+        $archivoPath = null;
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreOriginal = $archivo->getClientOriginalName();
+            $nombreLimpio = time() . '_' . str_replace(' ', '_', $nombreOriginal);
+            $archivoPath = $archivo->storeAs('concepts', $nombreLimpio, 'public');
+        }
+
+        // Crear concepto
+        Concept::create([
+            'titulo' => $request->titulo,
+            'contenido' => $request->contenido,
+            'concept_type_id' => $request->concept_type_id,
+            'concept_theme_id' => $request->concept_theme_id,
+            'año' => $request->año,
+            'fecha' => $request->fecha,
+            'archivo' => $archivoPath,
+            'user_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('concepts.index')
+            ->with('success', 'Concepto creado exitosamente');
+    }
+
+    // Mostrar concepto
+    public function show($id)
+    {
+        $concept = Concept::with(['conceptType', 'conceptTheme', 'user'])
+            ->findOrFail($id);
+        
+        // Verificar permiso si no es admin
+        if (!auth()->user()->is_admin && 
+            !auth()->user()->hasConceptPermissionFor($concept->concept_type_id)) {
+            return redirect()->route('admin.concepts.index')
+                ->with('error', 'No tienes permiso para ver este concepto');
+        }
+        
+        return view('admin.concepts.show', compact('concept'));
+    }
+
+    // Formulario para editar concepto
+    public function edit($id)
+    {
+        $concept = Concept::findOrFail($id);
+        
+        if (auth()->user()->is_admin) {
+            // Admin puede editar cualquier concepto
+            $conceptTypes = ConceptType::all();
+            $themes = ConceptTheme::where('concept_type_id', $concept->concept_type_id)->get();
+        } else {
+            // Verificar permiso de edición
+            if (!auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'edit')) {
+                return redirect()->route('admin.concepts.index')
+                    ->with('error', 'No tienes permiso para editar este concepto');
+            }
+            
+            // Obtener tipos con permiso
+            $conceptTypeIds = auth()->user()->conceptTypes()
+                ->wherePivot('can_edit', true)
+                ->pluck('concept_types.id')
+                ->toArray();
+            
+            $conceptTypes = ConceptType::whereIn('id', $conceptTypeIds)->get();
+            $themes = ConceptTheme::where('concept_type_id', $concept->concept_type_id)->get();
+        }
+        
+        return view('admin.concepts.edit_document', compact('concept', 'conceptTypes', 'themes'));
+    }
+
+    // Actualizar concepto
+    public function update(Request $request, $id)
+    {
+        $concept = Concept::findOrFail($id);
+        
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'nullable|string',
+            'concept_type_id' => 'required|exists:concept_types,id',
+            'concept_theme_id' => 'required|exists:concept_themes,id',
+            'año' => 'required|string|max:4',
+            'fecha' => 'required|date',
+            'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
+        ]);
+
+        // Verificar permisos si no es admin
+        if (!auth()->user()->is_admin) {
+            // Verificar permiso para la categoría actual
+            if (!auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'edit')) {
+                return redirect()->route('admin.concepts.index')
+                    ->with('error', 'No tienes permiso para editar conceptos en esta categoría');
+            }
+            
+            // Verificar permiso para la nueva categoría si cambia
+            if ($concept->concept_type_id != $request->concept_type_id && 
+                !auth()->user()->hasConceptPermissionFor($request->concept_type_id, 'edit')) {
+                return redirect()->route('admin.concepts.index')
+                    ->with('error', 'No tienes permiso para cambiar el concepto a esta categoría');
+            }
+        }
+
+        // Datos a actualizar
+        $data = $request->only([
+            'titulo', 'contenido', 'concept_type_id', 
+            'concept_theme_id', 'año', 'fecha'
+        ]);
+        
+        // Procesar archivo si existe
+        if ($request->hasFile('archivo')) {
+            // Eliminar archivo antiguo
+            if ($concept->archivo && Storage::disk('public')->exists($concept->archivo)) {
+                Storage::disk('public')->delete($concept->archivo);
+            }
+            
+            $archivo = $request->file('archivo');
+            $nombreOriginal = $archivo->getClientOriginalName();
+            $nombreLimpio = time() . '_' . str_replace(' ', '_', $nombreOriginal);
+            $data['archivo'] = $archivo->storeAs('concepts', $nombreLimpio, 'public');
+        }
+
+        // Actualizar concepto
+        $concept->update($data);
+
+        return redirect()->route('admin.concepts.index')
+            ->with('success', 'Concepto actualizado exitosamente');
+    }
+
+    // Eliminar concepto
+    public function destroy($id)
+    {
+        $concept = Concept::findOrFail($id);
+        
+        // Verificar permiso si no es admin
+        if (!auth()->user()->is_admin && 
+            !auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'delete')) {
+            return redirect()->route('admin.concepts.index')
+                ->with('error', 'No tienes permiso para eliminar este concepto');
+        }
+        
+        // Eliminar archivo si existe
+        if ($concept->archivo && Storage::disk('public')->exists($concept->archivo)) {
+            Storage::disk('public')->delete($concept->archivo);
+        }
+        
+        // Eliminar concepto
+        $concept->delete();
+        
+        return redirect()->route('admin.concepts.index')
+            ->with('success', 'Concepto eliminado exitosamente');
+    }
+}

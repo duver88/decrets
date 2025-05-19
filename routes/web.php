@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Middleware\IsAdmin;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\ConceptTypeController;
+use App\Http\Controllers\ConceptThemeController;
+use App\Http\Controllers\ConceptPermissionController;
 use App\Http\Controllers\UserCategoryPermissionController;  
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
 // Ruta pública: Vista de documentos para los usuarios
@@ -41,12 +45,12 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
-    Route::middleware('guest')->group(function () {
-        Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-        Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-    }); 
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+}); 
 
-    // Rutas para gestionar permisos de usuarios (solo admin)  
+// Rutas para gestionar permisos de usuarios (solo admin)  
 Route::middleware(['auth', IsAdmin::class])->group(function () {  
     Route::get('/dashboard/permisos', [UserCategoryPermissionController::class, 'index'])  
          ->name('permissions.index');  
@@ -74,22 +78,32 @@ Route::middleware(['auth'])->group(function () {
 
 // Rutas para conceptos
 Route::middleware(['auth'])->prefix('concepts')->name('concepts.')->group(function () {
-    Route::get('/', function () {
-        return view('concepts.index');
-    })->name('index');
+    // Rutas principales (sin parámetros)
+    Route::get('/', [ConceptController::class, 'index'])->name('index');
+    Route::get('/create', [ConceptController::class, 'create'])->name('create');
+    Route::post('/', [ConceptController::class, 'store'])->name('store');
     
-    Route::get('/create', function () {
-        return view('concepts.create_document');
-    })->name('create');
+    // Rutas específicas que no deben ser confundidas con IDs (IMPORTANTE: estas rutas deben ir ANTES de las rutas con parámetros)
+    Route::get('/themes/{typeId}', [ConceptController::class, 'getThemes'])->name('getThemes');
     
-    Route::get('/categories', function () {
-        return view('concepts.categories');
-    })->name('categories');
-    
-    // Solo administradores
-    Route::middleware(['admin'])->group(function () {
-        Route::get('/permissions', function () {
-            return view('concepts.user_permissions');
-        })->name('permissions');
+    // Rutas para categorías y permisos (solo administradores)
+    Route::middleware([IsAdmin::class])->group(function () {
+        Route::get('/categories', [ConceptTypeController::class, 'index'])->name('categories');
+        Route::post('/categories/types', [ConceptTypeController::class, 'store'])->name('storeType');
+        Route::post('/categories/themes', [ConceptThemeController::class, 'store'])->name('storeTheme');
+        Route::delete('/categories/types/{id}', [ConceptTypeController::class, 'destroy'])->name('destroyType');
+        Route::delete('/categories/themes/{id}', [ConceptThemeController::class, 'destroy'])->name('destroyTheme');
+        
+        Route::get('/permissions', [ConceptPermissionController::class, 'index'])->name('permissions');
+        Route::post('/permissions', [ConceptPermissionController::class, 'update'])->name('updatePermissions');
     });
+    
+    // Rutas con parámetros (DEBEN IR AL FINAL)
+    Route::get('/{id}', [ConceptController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [ConceptController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ConceptController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ConceptController::class, 'destroy'])->name('destroy');
 });
+
+// Ruta auxiliar para obtener temas (alternativa sin prefijo para depuración)
+Route::get('/get-themes/{typeId}', [ConceptController::class, 'getThemes'])->name('direct.getThemes');

@@ -68,4 +68,27 @@ class User extends Authenticatable
           
         return $categoryPermission->{'can_' . $permission} === true;  
     }  
+
+    // Relaciones para Relatoría conceptos
+        public function concepts()
+        {
+            return $this->hasMany(Concept::class);
+        }
+
+        public function conceptTypes()
+        {
+            return $this->belongsToMany(ConceptType::class, 'user_concept_permissions')
+                ->withPivot('can_create', 'can_edit', 'can_delete')
+                ->withTimestamps();
+        }
+
+        public function hasConceptPermissionFor($conceptTypeId, $permission = 'create')
+        {
+            $permissionColumn = 'can_' . $permission;
+            
+            return $this->is_admin || $this->conceptTypes()
+                ->where('concept_type_id', $conceptTypeId)
+                ->wherePivot($permissionColumn, true)
+                ->exists();
+        }
 }
