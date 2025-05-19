@@ -137,33 +137,23 @@ public function create(Request $request)
     }
 
     // Formulario para editar concepto
-    public function edit($id)
-    {
-        $concept = Concept::findOrFail($id);
-        
-        if (auth()->user()->is_admin) {
-            // Admin puede editar cualquier concepto
-            $conceptTypes = ConceptType::all();
-            $themes = ConceptTheme::where('concept_type_id', $concept->concept_type_id)->get();
-        } else {
-            // Verificar permiso de edición
-            if (!auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'edit')) {
-                return redirect()->route('admin.concepts.index')
-                    ->with('error', 'No tienes permiso para editar este concepto');
-            }
-            
-            // Obtener tipos con permiso
-            $conceptTypeIds = auth()->user()->conceptTypes()
-                ->wherePivot('can_edit', true)
-                ->pluck('concept_types.id')
-                ->toArray();
-            
-            $conceptTypes = ConceptType::whereIn('id', $conceptTypeIds)->get();
-            $themes = ConceptTheme::where('concept_type_id', $concept->concept_type_id)->get();
-        }
-        
-        return view('admin.concepts.edit_document', compact('concept', 'conceptTypes', 'themes'));
+public function edit(Request $request, $id)
+{
+    $concept = Concept::findOrFail($id);
+
+    // tipos disponibles para usuario/admin
+    $conceptTypes = ConceptType::all(); // o filtrado según permisos
+
+    $selectedTypeId = $request->query('concept_type_id', $concept->concept_type_id);
+
+    $themesForTypes = [];
+    if ($selectedTypeId) {
+        $themesForTypes[$selectedTypeId] = ConceptTheme::where('concept_type_id', $selectedTypeId)->get();
     }
+
+    return view('admin.concepts.edit_document', compact('concept', 'conceptTypes', 'selectedTypeId', 'themesForTypes'));
+}
+
 
     // Actualizar concepto
     public function update(Request $request, $id)
@@ -242,7 +232,7 @@ public function create(Request $request)
         // Eliminar concepto
         $concept->delete();
         
-        return redirect()->route('admin.concepts.index')
+        return redirect()->route('concepts.index')
             ->with('success', 'Concepto eliminado exitosamente');
     }
 }
