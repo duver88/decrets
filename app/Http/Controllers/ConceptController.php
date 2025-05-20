@@ -122,20 +122,24 @@ public function create(Request $request)
     }
 
     // Mostrar concepto
-    public function show($id)
-    {
-        $concept = Concept::with(['conceptType', 'conceptTheme', 'user'])
-            ->findOrFail($id);
-        
-        // Verificar permiso si no es admin
-        if (!auth()->user()->is_admin && 
-            !auth()->user()->hasConceptPermissionFor($concept->concept_type_id)) {
-            return redirect()->route('admin.concepts.index')
-                ->with('error', 'No tienes permiso para ver este concepto');
-        }
-        
-        return view('admin.concepts.show', compact('concept'));
+public function show($id)
+{
+    $concept = Concept::findOrFail($id);
+    
+    // Verificar si el usuario tiene permiso para ver este concepto
+    $canView = auth()->user()->is_admin || 
+              auth()->user()->hasGlobalConceptPermission('create') || 
+              auth()->user()->hasGlobalConceptPermission('edit') ||
+              auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'create') ||
+              auth()->user()->hasConceptPermissionFor($concept->concept_type_id, 'edit');
+    
+    if (!$canView) {
+        return redirect()->route('concepts.index')
+            ->with('error', 'No tienes permiso para ver este concepto');
     }
+    
+    return view('admin.concepts.show', compact('concept'));
+}
 
     // Formulario para editar concepto
 public function edit(Request $request, $id)
