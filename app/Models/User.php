@@ -91,4 +91,37 @@ class User extends Authenticatable
                 ->wherePivot($permissionColumn, true)
                 ->exists();
         }
+
+        public function hasGlobalConceptPermission($permission = 'create')
+    {
+        if ($this->is_admin) {
+            return true;
+        }
+        
+        $allTypes = ConceptType::all();
+        if ($allTypes->count() === 0) {
+            return false;
+        }
+        
+        $types = $this->conceptTypes;
+        if ($types->count() !== $allTypes->count()) {
+            return false;
+        }
+        
+        // Verificar que todos los tipos tengan el mismo permiso
+        $permissionColumn = 'can_' . $permission;
+        $firstValue = $types->first()->pivot->{$permissionColumn};
+        
+        if (!$firstValue) {
+            return false;
+        }
+        
+        return $types->every(function($type) use ($permissionColumn, $firstValue) {
+            return $type->pivot->{$permissionColumn} === $firstValue;
+        });
+    }
+
+        
+
+        
 }

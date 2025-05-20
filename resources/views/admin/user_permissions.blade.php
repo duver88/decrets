@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="bg-[#43883d] px-6 py-4">
-        <h2 class="text-2xl font-ubuntu font-bold text-white">Roles</h2>
+        <h2 class="text-2xl font-ubuntu font-bold text-white">Roles </h2>
     </div>
 
     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-b-lg">

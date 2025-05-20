@@ -34,7 +34,6 @@ class ConceptController extends Controller
     }
 
     // Formulario para crear concepto
-// ConceptController.php - actualiza el método create
 public function create(Request $request)
 {
     if (auth()->user()->is_admin) {

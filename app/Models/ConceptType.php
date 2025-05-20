@@ -27,4 +27,6 @@ class ConceptType extends Model
             ->withPivot('can_create', 'can_edit', 'can_delete')
             ->withTimestamps();
     }
+
+    
 }

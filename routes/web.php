@@ -102,6 +102,9 @@ Route::middleware(['auth'])->prefix('concepts')->name('concepts.')->group(functi
         
         Route::get('/permissions', [ConceptPermissionController::class, 'index'])->name('permissions');
         Route::post('/permissions', [ConceptPermissionController::class, 'update'])->name('updatePermissions');
+        // Dentro del grupo de rutas de conceptos con middleware IsAdmin
+          Route::get('/get-user-permissions/{userId}', [ConceptPermissionController::class, 'getUserPermissions'])
+               ->name('getUserPermissions');
     });
     
     // Rutas con parámetros (DEBEN IR AL FINAL)

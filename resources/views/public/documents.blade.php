@@ -137,7 +137,7 @@
     <div class="container my-5" style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div class="text-center mb-5">
             <h1 class="fw-bold" style="color: #43883d; font-family: 'Ubuntu', sans-serif;">
-                Sistema de Búsqueda de Normas
+               Relatoría de Actos Administrativos
                 <small class="d-block fs-5 mt-2 text-muted">Alcaldía de Bucaramanga</small>
             </h1>
         </div>
