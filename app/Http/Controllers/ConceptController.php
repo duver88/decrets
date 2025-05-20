@@ -238,4 +238,45 @@ public function edit(Request $request, $id)
         return redirect()->route('concepts.index')
             ->with('success', 'Concepto eliminado exitosamente');
     }
+
+    public function listPublic(Request $request)
+{
+    $query = Concept::with(['conceptType', 'conceptTheme']);
+    
+    // Aplicar filtros
+    if ($request->filled('tema')) {
+        $query->whereHas('conceptTheme', function($q) use ($request) {
+            $q->where('nombre', 'LIKE', '%' . $request->tema . '%');
+        });
+    }
+    
+    if ($request->filled('numero')) {
+        $query->where('año', 'LIKE', '%' . $request->numero . '%');
+    }
+    
+    if ($request->filled('tipo_concepto')) {
+        $query->where('concept_type_id', $request->tipo_concepto);
+    }
+    
+    if ($request->filled('fecha')) {
+        $query->whereDate('fecha', $request->fecha);
+    }
+    
+    $concepts = $query->orderBy('fecha', 'desc')->get();
+    $conceptTypes = ConceptType::all();
+    
+    return view('public.concepts', compact('concepts', 'conceptTypes'));
+}
+// Mostrar detalle de concepto (vista pública)
+
+public function showPublic($id)
+{
+    $concept = Concept::with(['conceptType', 'conceptTheme'])
+        ->findOrFail($id);
+    
+    return view('public.concepts_detail', compact('concept'));
+}
+
+
+
 }

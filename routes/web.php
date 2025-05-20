@@ -15,6 +15,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // Ruta pública: Vista de documentos para los usuarios
 Route::get('/', [DocumentController::class, 'listPublic'])->name('home');
+Route::get('/conceptos', [ConceptController::class, 'listPublic'])->name('concepts.public');
+// Ruta para ver detalle de concepto
+Route::get('/conceptos/{id}', [ConceptController::class, 'showPublic'])->name('concepts.show.public');
+
+
 
 // Rutas para descarga/ver documento
 Route::get('/documento/{id}', [DocumentController::class, 'show'])->name('document.show');
