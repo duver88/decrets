@@ -83,6 +83,7 @@ public function create(Request $request)
             'contenido' => 'nullable|string',
             'concept_type_id' => 'required|exists:concept_types,id',
             'concept_theme_id' => 'required|exists:concept_themes,id',
+            'tipo_documento' => 'required|in:Decreto,Resolución',
             'año' => 'required|string|max:4',
             'fecha' => 'required|date',
             'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
@@ -110,6 +111,7 @@ public function create(Request $request)
             'contenido' => $request->contenido,
             'concept_type_id' => $request->concept_type_id,
             'concept_theme_id' => $request->concept_theme_id,
+            'tipo_documento' => $request->tipo_documento,
             'año' => $request->año,
             'fecha' => $request->fecha,
             'archivo' => $archivoPath,
@@ -165,6 +167,7 @@ public function edit(Request $request, $id)
             'contenido' => 'nullable|string',
             'concept_type_id' => 'required|exists:concept_types,id',
             'concept_theme_id' => 'required|exists:concept_themes,id',
+            'tipo_documento' => 'required|in:Decreto,Resolución',
             'año' => 'required|string|max:4',
             'fecha' => 'required|date',
             'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
@@ -189,7 +192,7 @@ public function edit(Request $request, $id)
         // Datos a actualizar
         $data = $request->only([
             'titulo', 'contenido', 'concept_type_id', 
-            'concept_theme_id', 'año', 'fecha'
+            'concept_theme_id', 'tipo_documento', 'año', 'fecha'
         ]);
         
         // Procesar archivo si existe
@@ -208,7 +211,7 @@ public function edit(Request $request, $id)
         // Actualizar concepto
         $concept->update($data);
 
-        return redirect()->route('admin.concepts.index')
+        return redirect()->route('concepts.index')
             ->with('success', 'Concepto actualizado exitosamente');
     }
 

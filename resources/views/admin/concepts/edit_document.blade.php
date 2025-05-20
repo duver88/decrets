@@ -59,6 +59,26 @@
                 @enderror
             </div>
 
+            {{-- Decreto o resolucion  --}}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Documento</label>
+                <div class="flex space-x-6">
+                    <div class="flex items-center">
+                        <input type="radio" id="decreto" name="tipo_documento" value="Decreto" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {{ old('tipo_documento', $concept->tipo_documento ?? 'Decreto') == 'Decreto' ? 'checked' : '' }} required>
+                        <label for="decreto" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Decreto</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="resolucion" name="tipo_documento" value="Resolución" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {{ old('tipo_documento', $concept->tipo_documento ?? '') == 'Resolución' ? 'checked' : '' }}>
+                        <label for="resolucion" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Resolución</label>
+                    </div>
+                </div>
+                @error('tipo_documento')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+                    
+            {{-- Fin Decreto o Resolucion  --}}
+
             <!-- Año -->
             <div class="mb-4">
                 <label for="año" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Año</label>

@@ -58,6 +58,21 @@
             @enderror
         </div>
 
+        {{-- Decreto o Resolucion --}}
+            
+            <div class="mb-4">
+                <label for="tipo_documento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Documento</label>
+                <select name="tipo_documento" id="tipo_documento" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                    <option value="">-- Selecciona el tipo de documento --</option>
+                    <option value="Decreto" {{ old('tipo_documento') == 'Decreto' ? 'selected' : '' }}>Decreto</option>
+                    <option value="Resolución" {{ old('tipo_documento') == 'Resolución' ? 'selected' : '' }}>Resolución</option>
+                </select>
+                @error('tipo_documento')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+        {{-- Fin Decreto o Resolucion  --}}
+
         <!-- Año -->
         <div class="mb-4">
             <label for="año" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Año</label>

@@ -83,6 +83,7 @@ Route::middleware(['auth'])->prefix('concepts')->name('concepts.')->group(functi
     Route::get('/create', [ConceptController::class, 'create'])->name('create');
     Route::post('/', [ConceptController::class, 'store'])->name('store');
     
+    
     // Rutas específicas que no deben ser confundidas con IDs (IMPORTANTE: estas rutas deben ir ANTES de las rutas con parámetros)
     Route::get('/themes/{typeId}', [ConceptController::class, 'getThemes'])->name('getThemes');
     

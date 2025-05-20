@@ -16,6 +16,7 @@ class Concept extends Model
         'concept_type_id', 
         'concept_theme_id', 
         'user_id',
+        'tipo_documento',
         'año',
         'fecha'
     ];
