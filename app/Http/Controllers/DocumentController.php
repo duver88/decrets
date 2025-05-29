@@ -10,36 +10,145 @@ use Illuminate\Support\Facades\Storage;
 class DocumentController extends Controller
 {
     // Método para la vista pública
+
     public function listPublic(Request $request)
     {
-        $query = Document::query();
+        $query = Document::with('category');
 
+        // Filtro por tipo de documento
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
+
+        // Filtro por número (búsqueda parcial mejorada)
         if ($request->filled('numero')) {
-            $query->where('numero', 'LIKE', '%' . $request->numero . '%');
+            $numero = trim($request->numero);
+            $query->where('numero', 'LIKE', '%' . $numero . '%');
         }
+
+        // Filtro por nombre (búsqueda parcial mejorada)
         if ($request->filled('nombre')) {
-            $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
+            $nombre = trim($request->nombre);
+            $query->where('nombre', 'LIKE', '%' . $nombre . '%');
         }
-        if ($request->filled('fecha')) {
-            $query->whereDate('fecha', $request->fecha); // 🔹 Corrección aquí
+
+        // Filtro por categoría
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
         }
-    
-        // Ordenar según el parámetro 'orden'
-        if ($request->orden === 'numero') {
-            $query->orderBy('numero', 'asc'); // Menor a mayor
-        } elseif ($request->orden === 'nombre') {
-            $query->orderBy('nombre', 'asc'); // A-Z
+
+        // Filtros de fecha mejorados
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha', '<=', $request->fecha_hasta);
+        }
+
+        // Filtro por fecha exacta (mantener compatibilidad)
+        if ($request->filled('fecha') && !$request->filled('fecha_desde') && !$request->filled('fecha_hasta')) {
+            $query->whereDate('fecha', $request->fecha);
+        }
+
+        // Filtro por año
+        if ($request->filled('año')) {
+            $query->whereYear('fecha', $request->año);
+        }
+
+        // Filtro por mes (si se proporciona año)
+        if ($request->filled('mes') && $request->filled('año')) {
+            $query->whereMonth('fecha', $request->mes);
+        }
+
+        // Búsqueda general (busca en nombre, número y descripción)
+        if ($request->filled('busqueda_general')) {
+            $busqueda = trim($request->busqueda_general);
+            $query->where(function($q) use ($busqueda) {
+                $q->where('nombre', 'LIKE', '%' . $busqueda . '%')
+                  ->orWhere('numero', 'LIKE', '%' . $busqueda . '%')
+                  ->orWhere('descripcion', 'LIKE', '%' . $busqueda . '%');
+            });
+        }
+
+        // Ordenamiento mejorado
+        $orden = $request->get('orden', 'fecha_desc');
+        switch ($orden) {
+            case 'numero_asc':
+                $query->orderBy('numero', 'asc');
+                break;
+            case 'numero_desc':
+                $query->orderBy('numero', 'desc');
+                break;
+            case 'nombre_asc':
+                $query->orderBy('nombre', 'asc');
+                break;
+            case 'nombre_desc':
+                $query->orderBy('nombre', 'desc');
+                break;
+            case 'fecha_asc':
+                $query->orderBy('fecha', 'asc');
+                break;
+            case 'tipo_asc':
+                $query->orderBy('tipo', 'asc')->orderBy('fecha', 'desc');
+                break;
+            case 'categoria_asc':
+                $query->join('categories', 'documents.category_id', '=', 'categories.id')
+                      ->orderBy('categories.nombre', 'asc')
+                      ->orderBy('documents.fecha', 'desc')
+                      ->select('documents.*');
+                break;
+            default: // fecha_desc
+                $query->orderBy('fecha', 'desc');
+        }
+
+        // Paginación opcional
+        if ($request->filled('per_page') && in_array($request->per_page, [10, 25, 50, 100])) {
+            $documents = $query->paginate($request->per_page)->withQueryString();
         } else {
-            $query->orderBy('fecha', 'desc'); // Default: más recientes primero
+            $documents = $query->get();
         }
-    
-        $documents = $query->get();
-        $categories = Category::all();
-    
-        return view('public.documents', compact('documents', 'categories'));
+
+        // Datos adicionales para los filtros
+        $categories = Category::orderBy('nombre')->get();
+        $tipos = Document::distinct()->pluck('tipo')->filter()->sort()->values();
+        $años = Document::selectRaw('YEAR(fecha) as año')
+                       ->distinct()
+                       ->orderBy('año', 'desc')
+                       ->pluck('año')
+                       ->filter();
+
+        // Estadísticas rápidas para mostrar en la vista
+        $stats = [
+            'total' => $query->count(),
+            'por_tipo' => Document::selectRaw('tipo, COUNT(*) as count')
+                                 ->groupBy('tipo')
+                                 ->pluck('count', 'tipo'),
+            'por_categoria' => Document::join('categories', 'documents.category_id', '=', 'categories.id')
+                                      ->selectRaw('categories.nombre, COUNT(*) as count')
+                                      ->groupBy('categories.nombre')
+                                      ->pluck('count', 'nombre'),
+        ];
+
+        return view('public.documents', compact(
+            'documents', 
+            'categories', 
+            'tipos', 
+            'años', 
+            'stats'
+        ));
+    }
+
+    public function getStats()
+    {
+        return [
+            'total_documentos' => Document::count(),
+            'por_mes_actual' => Document::whereMonth('fecha', now()->month)
+                                      ->whereYear('fecha', now()->year)
+                                      ->count(),
+            'ultimos_30_dias' => Document::where('fecha', '>=', now()->subDays(30))->count(),
+            'por_categoria' => Category::withCount('documents')->get(),
+        ];
     }
 
     // Vista para ver más o descargar documento

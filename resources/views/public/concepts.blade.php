@@ -37,6 +37,8 @@
         .tab-content.active {
             display: block;
         }
+
+        
     </style>
 </head>
 <body>
@@ -198,70 +200,256 @@
         </div>
 
         <!-- Formulario para filtrar conceptos -->
-        <form method="GET" action="{{ route('concepts.public') }}" class="bg-white text-[#93C01F] p-4 rounded mb-4">
-            <h2 class="h5 mb-4 d-flex align-items-center">
-                <i class="fas fa-filter me-2" style="color: #93C01F;"></i>
-                Filtrar Conceptos
+
+        <!-- FORMULARIO -->
+<form id="filtersForm" class="bg-white p-4 border rounded-3 shadow-sm mb-5">
+    <!-- BÚSQUEDA -->
+    <div class="mb-4">
+        <label for="busqueda_general" class="form-label fw-bold text-success">
+            <i class="fas fa-search me-2"></i>Búsqueda General
+        </label>
+        <div class="input-group">
+            <span class="input-group-text bg-success text-white"><i class="fas fa-search"></i></span>
+            <input type="search" name="busqueda_general" id="busqueda_general"
+                   class="form-control" placeholder="Título, contenido, año, número..."
+                   value="{{ request('busqueda_general') }}">
+        </div>
+        <small class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Usa palabras clave del documento</small>
+    </div>
+
+    <!-- GRUPOS DESPLEGABLES -->
+    <div class="accordion" id="filtrosAccordion">
+
+        <!-- Filtrar por contenido -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingContenido">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContenido">
+                    <i class="fas fa-tags me-2 text-success"></i>Filtrar por categoría
+                </button>
             </h2>
-
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="tema" class="form-label">Tema</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white text-muted border-end-0">
-                            <i class="fas fa-tag"></i>
-                        </span>
-                        <input type="text" id="tema" name="tema" class="form-control border-start-0" placeholder="Buscar por tema" value="{{ request('tema') }}">
+            <div id="collapseContenido" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
+                <div class="accordion-body row g-3">
+                    <div class="col-md-6">
+                        <label for="concept_type_id" class="form-label">Tipo de Concepto</label>
+                        <select name="concept_type_id" id="concept_type_id" class="form-select">
+                            <option value="">Todos</option>
+                            @foreach($conceptTypes as $t)
+                                <option value="{{ $t->id }}" @selected(request('concept_type_id') == $t->id)>{{ $t->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="concept_theme_id" class="form-label">Tema Específico</label>
+                        <select name="concept_theme_id" id="concept_theme_id" class="form-select">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
                 </div>
-                
-                <div class="col-md-3">
-                    <label for="numero" class="form-label">Año</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white text-muted border-end-0">
-                            <i class="fas fa-hashtag"></i>
-                        </span>
-                        <input type="text" id="numero" name="numero" class="form-control border-start-0" placeholder="Buscar por año" value="{{ request('numero') }}">
+            </div>
+        </div>
+
+        <!-- Filtrar por documento -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDocumento">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumento">
+                    <i class="fas fa-file-alt me-2 text-success"></i>Filtrar por documento
+                </button>
+            </h2>
+            <div id="collapseDocumento" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
+                <div class="accordion-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Documento</label>
+                        <select name="tipo_documento" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Decreto" @selected(request('tipo_documento') == 'Decreto')>Decreto</option>
+                            <option value="Resolución" @selected(request('tipo_documento') == 'Resolución')>Resolución</option>
+                            <option value="Circular" @selected(request('tipo_documento') == 'Circular')>Circular</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Año</label>
+                        <select name="año" class="form-select">
+                            <option value="">Todos</option>
+                            @foreach($años as $a)
+                                <option value="{{ $a }}" @selected(request('año') == $a)>{{ $a }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtrar por fechas -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFechas">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFechas">
+                    <i class="fas fa-calendar-alt me-2 text-success"></i>Filtrar por fechas
+                </button>
+            </h2>
+            <div id="collapseFechas" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
+                <div class="accordion-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ request('fecha_desde') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ request('fecha_hasta') }}">
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-3">
-                    <label for="fecha" class="form-label">Fecha</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white text-muted border-end-0">
-                            <i class="fas fa-calendar-alt"></i>
-                        </span>
-                        <input type="date" id="fecha" name="fecha" class="form-control border-start-0" value="{{ request('fecha') }}">
+        <!-- Preferencias de visualización -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOrden">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrden">
+                    <i class="fas fa-eye me-2 text-success"></i>Preferencias de visualización
+                </button>
+            </h2>
+            <div id="collapseOrden" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
+                <div class="accordion-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Ordenar por</label>
+                        <select name="orden" class="form-select">
+                            <option value="fecha_desc" @selected(request('orden') == 'fecha_desc')>Fecha más reciente</option>
+                            <option value="fecha_asc" @selected(request('orden') == 'fecha_asc')>Fecha más antigua</option>
+                            <option value="titulo_asc" @selected(request('orden') == 'titulo_asc')>Título A-Z</option>
+                            <option value="titulo_desc" @selected(request('orden') == 'titulo_desc')>Título Z-A</option>
+                        </select>
                     </div>
-                </div>
-
-                <div class="col-md-3">
-                    <label for="tipo_concepto" class="form-label">Tipo</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white text-muted border-end-0">
-                            <i class="fas fa-file-alt"></i>
-                        </span>
-                        <select id="tipo_concepto" name="tipo_concepto" class="form-select border-start-0">
-                            <option value="">Todos los tipos</option>
-                            @foreach($conceptTypes as $type)
-                                <option value="{{ $type->id }}" {{ request('tipo_concepto') == $type->id ? 'selected' : '' }}>{{ $type->nombre }}</option>
+                    <div class="col-md-6">
+                        <label class="form-label">Resultados por página</label>
+                        <select name="per_page" class="form-select">
+                            @foreach([10, 25, 50, 100] as $pp)
+                                <option value="{{ $pp }}" @selected(request('per_page') == $pp)>{{ $pp }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="mt-4 d-flex flex-wrap gap-3">
-                <button type="submit" class="btn d-flex align-items-center gap-2" style="background-color: #43883d; color: white;">
-                    <i class="fas fa-search"></i>
-                    Buscar
-                </button>
-                <a href="{{ route('concepts.public') }}" class="btn btn-outline-light d-flex align-items-center gap-2">
-                    <i class="fas fa-undo"></i>
-                    Limpiar filtros
+    <!-- BOTONES -->
+    <div class="d-flex justify-content-center gap-3 mt-5 pt-4 border-top">
+        <button type="submit" class="btn text-white px-5 py-2 rounded-pill" style="background-color: #43883d;">
+            <i class="fas fa-search me-2"></i>Buscar
+        </button>
+        <a href="{{ route('concepts.public') }}" class="btn btn-outline-secondary px-5 py-2 rounded-pill">
+            <i class="fas fa-eraser me-2"></i>Limpiar
+        </a>
+    </div>
+</form>
+
+
+@if (
+    request()->filled('busqueda_general') ||
+    request()->filled('concept_type_id') ||
+    request()->filled('concept_theme_id') ||
+    request()->filled('tipo_documento') ||
+    request()->filled('año') ||
+    request()->filled('mes') ||
+    request()->filled('fecha_desde') ||
+    request()->filled('fecha_hasta') ||
+    request()->filled('orden')
+)
+    <div class="mt-4 pt-3 border-top">
+        <h6 class="fw-bold text-success mb-2">Filtros aplicados:</h6>
+        <div class="d-flex flex-wrap gap-2">
+            @php
+                $baseParams = request()->except([
+                    '_token', 'page'
+                ]);
+            @endphp
+
+            @if(request()->filled('busqueda_general'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['busqueda_general' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #43883D;">
+                    🔍 {{ request('busqueda_general') }} &times;
                 </a>
-            </div>
-        </form>
+            @endif
+
+            @if(request()->filled('concept_type_id'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_type_id' => null, 'concept_theme_id' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #4E7525;">
+                    Tipo: {{ $conceptTypes->firstWhere('id', request('concept_type_id'))?->nombre }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('concept_theme_id'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_theme_id' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #6A9739;">
+                    Tema: {{ $temasFiltered->firstWhere('id', request('concept_theme_id'))?->nombre }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('tipo_documento'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['tipo_documento' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #7A7A52;">
+                    Documento: {{ request('tipo_documento') }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('año'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['año' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #B2B700;">
+                    Año: {{ request('año') }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('mes'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['mes' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #CCCC00;">
+                    Mes: {{ \Carbon\Carbon::create()->month(request('mes'))->translatedFormat('F') }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('fecha_desde'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_desde' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #878D47;">
+                    Desde: {{ request('fecha_desde') }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('fecha_hasta'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_hasta' => null])) }}"
+                   class="badge text-white"
+                   style="background-color: #878D47;">
+                    Hasta: {{ request('fecha_hasta') }} &times;
+                </a>
+            @endif
+
+            @if(request()->filled('orden'))
+                <a href="{{ route('concepts.public', array_merge($baseParams, ['orden' => null])) }}"
+                   class="badge text-dark bg-light border border-secondary">
+                    Orden: {{
+                        match(request('orden')) {
+                            'fecha_desc' => 'Más reciente',
+                            'fecha_asc' => 'Más antiguo',
+                            'titulo_asc' => 'Título A-Z',
+                            'titulo_desc' => 'Título Z-A',
+                            default => request('orden')
+                        }
+                    }} &times;
+                </a>
+            @endif
+        </div>
+    </div>
+@endif
+
+
+<br>
+<!-- Loader -->
+
 
         <!-- Listado de conceptos -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
@@ -416,5 +604,37 @@
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const typeSel  = document.getElementById('concept_type_id');
+  const themeSel = document.getElementById('concept_theme_id');
+
+  async function loadThemes(typeId){
+     themeSel.innerHTML = '<option value="">Cargando temas...</option>';
+     try {
+       const r = await fetch(`/api/concept-themes-by-type/${typeId}`);
+       const list = await r.json();
+       themeSel.innerHTML = '<option value="">Todos los temas</option>';
+       list.forEach(t => {
+          const opt = new Option(t.nombre, t.id, false, t.id == '{{ request('concept_theme_id') }}');
+          themeSel.add(opt);
+       });
+     } catch (error) {
+       themeSel.innerHTML = '<option value="">Error al cargar temas</option>';
+     }
+  }
+
+  if(typeSel.value) loadThemes(typeSel.value);
+  typeSel.addEventListener('change', e => {
+     if(e.target.value){ 
+       loadThemes(e.target.value); 
+     } else { 
+       themeSel.innerHTML = '<option value="">Todos los temas</option>'; 
+     }
+  });
+});
+
+</script>
 </body>
 </html>
+

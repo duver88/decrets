@@ -13,6 +13,31 @@ use App\Http\Controllers\UserCategoryPermissionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
+// Ruta auxiliar para obtener temas (alternativa sin prefijo para depuración)
+Route::get('/get-themes/{typeId}', [ConceptController::class, 'getThemes'])->name('direct.getThemes');
+
+// Rutas para filtros AJAX de Conceptos
+Route::get('/api/concept-themes-by-type/{typeId}', [ConceptController::class, 'getThemesByType'])
+    ->name('api.concept-themes-by-type');
+
+Route::get('/api/concept-stats', [ConceptController::class, 'getAdvancedStats'])
+    ->name('api.concept-stats');
+
+// Rutas para filtros AJAX de Documentos
+Route::get('/api/document-stats', [DocumentController::class, 'getStats'])
+    ->name('api.document-stats');
+
+// Rutas existentes mejoradas (mantener las que ya tienes y agregar estas)
+Route::prefix('conceptos')->group(function () {
+    Route::get('/', [ConceptController::class, 'listPublic'])->name('public.concepts');
+    Route::get('/{id}', [ConceptController::class, 'showPublic'])->name('public.concepts.show');
+});
+
+Route::prefix('documentos')->group(function () {
+    Route::get('/', [DocumentController::class, 'listPublic'])->name('public.documents');
+    Route::get('/{id}', [DocumentController::class, 'show'])->name('public.documents.show');
+});
+
 // Ruta pública: Vista de documentos para los usuarios
 Route::get('/', [DocumentController::class, 'listPublic'])->name('home');
 Route::get('/conceptos', [ConceptController::class, 'listPublic'])->name('concepts.public');
@@ -113,6 +138,3 @@ Route::middleware(['auth'])->prefix('concepts')->name('concepts.')->group(functi
     Route::put('/{id}', [ConceptController::class, 'update'])->name('update');
     Route::delete('/{id}', [ConceptController::class, 'destroy'])->name('destroy');
 });
-
-// Ruta auxiliar para obtener temas (alternativa sin prefijo para depuración)
-Route::get('/get-themes/{typeId}', [ConceptController::class, 'getThemes'])->name('direct.getThemes');
