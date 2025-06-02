@@ -363,11 +363,24 @@ public function edit(Request $request, $id)
         }
 
         // Paginación opcional
-        if ($request->filled('per_page') && in_array($request->per_page, [10, 25, 50, 100])) {
-            $concepts = $query->paginate($request->per_page)->withQueryString();
-        } else {
-            $concepts = $query->get();
-        }
+    $concepts = $query->paginate(10)->withQueryString();
+
+    // Datos adicionales para los filtros
+    $conceptTypes = ConceptType::orderBy('nombre')->get();
+    $conceptThemes = ConceptTheme::with('conceptType')->orderBy('nombre')->get();
+    $años = Concept::distinct()->orderBy('año', 'desc')->pluck('año')->filter();
+    $tiposDocumento = ['Decreto', 'Resolución'];
+
+    // Si hay un tipo seleccionado, filtrar temas por ese tipo
+    $temasFiltered = collect();
+    if ($request->filled('concept_type_id')) {
+        $temasFiltered = ConceptTheme::where('concept_type_id', $request->concept_type_id)
+                                    ->orderBy('nombre')
+                                    ->get();
+    }
+
+
+
 
         // Datos adicionales para los filtros
         $conceptTypes = ConceptType::orderBy('nombre')->get();

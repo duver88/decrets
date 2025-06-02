@@ -38,7 +38,158 @@
             display: block;
         }
 
-        
+        .chip {
+            display: inline-block;
+            background-color: #E6F0E5;
+            color: #285F19;
+            padding: 5px 14px;
+            margin: 3px;
+            border-radius: 20px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .chip.active {
+            background-color: #43883d;
+            color: white;
+        }
+
+        .order-option {
+            margin-right: 10px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .order-option.active {
+            color: #285F19;
+            font-weight: 700;
+        }
+
+        .toggle-advanced {
+            color: #285F19;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* ESTILOS MEJORADOS PARA PAGINACIÓN */
+        .pagination-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            margin-top: 40px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .pagination-info {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #e3e6ea;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .pagination-info .badge {
+            background-color: #43883d !important;
+            color: white;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin: 0;
+            gap: 5px;
+        }
+
+        .pagination .page-item {
+            margin: 0 2px;
+        }
+
+        .pagination .page-link {
+            color: #43883d;
+            border: 2px solid #e9ecef;
+            border-radius: 10px !important;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #43883d;
+            border-color: #43883d;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 136, 61, 0.3);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #43883d;
+            border-color: #43883d;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(67, 136, 61, 0.4);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #9ca3af;
+            background-color: #f3f4f6;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Iconos para primera/última página */
+        .pagination .page-link[aria-label*="First"]::before {
+            content: "⟪";
+            margin-right: 5px;
+        }
+
+        .pagination .page-link[aria-label*="Previous"]::before {
+            content: "‹";
+            margin-right: 5px;
+        }
+
+        .pagination .page-link[aria-label*="Next"]::after {
+            content: "›";
+            margin-left: 5px;
+        }
+
+        .pagination .page-link[aria-label*="Last"]::after {
+            content: "⟫";
+            margin-left: 5px;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 576px) {
+            .pagination-container {
+                padding: 15px;
+                margin-top: 20px;
+            }
+            
+            .pagination .page-link {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 35px;
+            }
+            
+            .pagination-info {
+                text-align: center;
+                padding: 12px 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -199,257 +350,241 @@
             </div>
         </div>
 
-        <!-- Formulario para filtrar conceptos -->
-
         <!-- FORMULARIO -->
-<form id="filtersForm" class="bg-white p-4 border rounded-3 shadow-sm mb-5">
-    <!-- BÚSQUEDA -->
-    <div class="mb-4">
-        <label for="busqueda_general" class="form-label fw-bold text-success">
-            <i class="fas fa-search me-2"></i>Búsqueda General
-        </label>
-        <div class="input-group">
-            <span class="input-group-text bg-success text-white"><i class="fas fa-search"></i></span>
-            <input type="search" name="busqueda_general" id="busqueda_general"
-                   class="form-control" placeholder="Título, contenido, año, número..."
-                   value="{{ request('busqueda_general') }}">
+        @php
+            $selectedType = request('concept_type_id');
+            $selectedOrder = request('orden', 'fecha_desc');
+            $currentTipoDocumento = request('tipo_documento');
+        @endphp
+
+        <!-- CHIPS DE TIPOS DE DOCUMENTO -->
+        <div class="mb-3">
+            @foreach($tiposDocumento as $tipo)
+                <form method="GET" action="{{ route('concepts.public') }}" class="d-inline">
+                    <input type="hidden" name="tipo_documento" value="{{ $tipo }}">
+                    <button type="submit" class="chip {{ $currentTipoDocumento == $tipo ? 'active' : '' }}">
+                        {{ $tipo }} ({{ $stats['por_tipo_documento'][$tipo] ?? 0 }})
+                    </button>
+                </form>
+            @endforeach
+            <form method="GET" action="{{ route('concepts.public') }}" class="d-inline">
+                <input type="hidden" name="tipo_documento" value="">
+                <button type="submit" class="chip {{ !$currentTipoDocumento ? 'active' : '' }}">Todos</button>
+            </form>
         </div>
-        <small class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Usa palabras clave del documento</small>
-    </div>
 
-    <!-- GRUPOS DESPLEGABLES -->
-    <div class="accordion" id="filtrosAccordion">
+        <!-- CHIPS DE TIPOS DE CONCEPTO -->
+        <div class="mb-4">
+            @foreach($conceptTypes as $tipo)
+                <form method="GET" action="{{ route('concepts.public') }}" class="d-inline">
+                    <input type="hidden" name="concept_type_id" value="{{ $tipo->id }}">
+                    <button type="submit" class="chip {{ $selectedType == $tipo->id ? 'active' : '' }}">
+                        {{ $tipo->nombre }}
+                    </button>
+                </form>
+            @endforeach
+        </div>
 
-        <!-- Filtrar por contenido -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingContenido">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContenido">
-                    <i class="fas fa-tags me-2 text-success"></i>Filtrar por categoría
-                </button>
-            </h2>
-            <div id="collapseContenido" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
-                <div class="accordion-body row g-3">
+        <!-- BUSCADOR GENERAL -->
+        <form method="GET" action="{{ route('concepts.public') }}">
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-light text-secondary"><i class="fas fa-search"></i></span>
+                <input type="search" name="busqueda_general" class="form-control"
+                       placeholder="Buscar por título, contenido, año..." value="{{ request('busqueda_general') }}">
+                <button class="btn btn-success" type="submit">Buscar</button>
+            </div>
+
+            <!-- ORDEN Y TOGGLE AVANZADO -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-sort text-muted"></i>
+                    <label class="fw-bold text-muted mb-0">Ordenar:</label>
+                    @foreach([
+                        'fecha_desc' => 'Recientes',
+                        'titulo_asc' => 'A-Z',
+                        'fecha_asc' => 'Antiguos',
+                    ] as $key => $label)
+                        <label class="order-option {{ $selectedOrder == $key ? 'active' : '' }}">
+                            <input type="radio" name="orden" value="{{ $key }}" onchange="this.form.submit()" hidden
+                                   {{ $selectedOrder == $key ? 'checked' : '' }}>
+                            {{ $label }}
+                        </label>
+                    @endforeach
+                </div>
+                <div>
+                    <a class="toggle-advanced text-decoration-none" data-bs-toggle="collapse" href="#filtrosAvanzados" role="button">
+                        <i class="fas fa-sliders-h me-1"></i> Filtros avanzados
+                    </a>
+                </div>
+            </div>
+
+            <!-- FILTROS AVANZADOS -->
+            <div class="collapse mb-4" id="filtrosAvanzados">
+                <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="concept_type_id" class="form-label">Tipo de Concepto</label>
-                        <select name="concept_type_id" id="concept_type_id" class="form-select">
+                        <label for="concept_theme_id" class="form-label"><i class="fas fa-tags me-1"></i> Tema específico</label>
+                        <select class="form-select" name="concept_theme_id" id="concept_theme_id" onchange="asignarTipoDesdeTema()">
                             <option value="">Todos</option>
-                            @foreach($conceptTypes as $t)
-                                <option value="{{ $t->id }}" @selected(request('concept_type_id') == $t->id)>{{ $t->nombre }}</option>
+                            @foreach($conceptThemes as $tema)
+                                <option value="{{ $tema->id }}" data-type-id="{{ $tema->concept_type_id }}"
+                                    @selected(request('concept_theme_id') == $tema->id)>
+                                    {{ $tema->nombre }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="concept_theme_id" class="form-label">Tema Específico</label>
-                        <select name="concept_theme_id" id="concept_theme_id" class="form-select">
+                        <label for="concept_type_id" class="form-label"><i class="fas fa-folder-open me-1"></i> Tipo de Concepto</label>
+                        <select class="form-select" name="concept_type_id" id="concept_type_id">
                             <option value="">Todos</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filtrar por documento -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingDocumento">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumento">
-                    <i class="fas fa-file-alt me-2 text-success"></i>Filtrar por documento
-                </button>
-            </h2>
-            <div id="collapseDocumento" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
-                <div class="accordion-body row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Tipo de Documento</label>
-                        <select name="tipo_documento" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="Decreto" @selected(request('tipo_documento') == 'Decreto')>Decreto</option>
-                            <option value="Resolución" @selected(request('tipo_documento') == 'Resolución')>Resolución</option>
-                            <option value="Circular" @selected(request('tipo_documento') == 'Circular')>Circular</option>
+                            @foreach($conceptTypes as $tipo)
+                                <option value="{{ $tipo->id }}" @selected(request('concept_type_id') == $tipo->id)>
+                                    {{ $tipo->nombre }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Año</label>
-                        <select name="año" class="form-select">
+                        <label for="tipo_documento" class="form-label"><i class="fas fa-file-alt me-1"></i> Tipo de Documento</label>
+                        <select class="form-select" name="tipo_documento" id="tipo_documento">
+                            <option value="">Todos</option>
+                            @foreach($tiposDocumento as $tipo)
+                                <option value="{{ $tipo }}" @selected(request('tipo_documento') == $tipo)>
+                                    {{ $tipo }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="año" class="form-label"><i class="fas fa-calendar me-1"></i> Año</label>
+                        <select class="form-select" name="año">
                             <option value="">Todos</option>
                             @foreach($años as $a)
                                 <option value="{{ $a }}" @selected(request('año') == $a)>{{ $a }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Filtrar por fechas -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingFechas">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFechas">
-                    <i class="fas fa-calendar-alt me-2 text-success"></i>Filtrar por fechas
-                </button>
-            </h2>
-            <div id="collapseFechas" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
-                <div class="accordion-body row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Fecha Desde</label>
+                        <label class="form-label"><i class="fas fa-calendar-day me-1"></i> Fecha desde</label>
                         <input type="date" name="fecha_desde" class="form-control" value="{{ request('fecha_desde') }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Fecha Hasta</label>
+                        <label class="form-label"><i class="fas fa-calendar-day me-1"></i> Fecha hasta</label>
                         <input type="date" name="fecha_hasta" class="form-control" value="{{ request('fecha_hasta') }}">
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preferencias de visualización -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOrden">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrden">
-                    <i class="fas fa-eye me-2 text-success"></i>Preferencias de visualización
-                </button>
-            </h2>
-            <div id="collapseOrden" class="accordion-collapse collapse" data-bs-parent="#filtrosAccordion">
-                <div class="accordion-body row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Ordenar por</label>
-                        <select name="orden" class="form-select">
-                            <option value="fecha_desc" @selected(request('orden') == 'fecha_desc')>Fecha más reciente</option>
-                            <option value="fecha_asc" @selected(request('orden') == 'fecha_asc')>Fecha más antigua</option>
-                            <option value="titulo_asc" @selected(request('orden') == 'titulo_asc')>Título A-Z</option>
-                            <option value="titulo_desc" @selected(request('orden') == 'titulo_desc')>Título Z-A</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Resultados por página</label>
-                        <select name="per_page" class="form-select">
-                            @foreach([10, 25, 50, 100] as $pp)
-                                <option value="{{ $pp }}" @selected(request('per_page') == $pp)>{{ $pp }}</option>
-                            @endforeach
-                        </select>
+                    <div class="col-md-6 d-flex align-items-end justify-content-end">
+                        <button class="btn btn-outline-secondary me-2" type="reset" onclick="window.location.href='{{ route('concepts.public') }}'">
+                            <i class="fas fa-times me-1"></i> Limpiar
+                        </button>
+                        <button class="btn btn-success" type="submit">
+                            <i class="fas fa-filter me-1"></i> Aplicar filtros
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </form>
 
-    <!-- BOTONES -->
-    <div class="d-flex justify-content-center gap-3 mt-5 pt-4 border-top">
-        <button type="submit" class="btn text-white px-5 py-2 rounded-pill" style="background-color: #43883d;">
-            <i class="fas fa-search me-2"></i>Buscar
-        </button>
-        <a href="{{ route('concepts.public') }}" class="btn btn-outline-secondary px-5 py-2 rounded-pill">
-            <i class="fas fa-eraser me-2"></i>Limpiar
-        </a>
-    </div>
-</form>
+        @if (
+            request()->filled('busqueda_general') ||
+            request()->filled('concept_type_id') ||
+            request()->filled('concept_theme_id') ||
+            request()->filled('tipo_documento') ||
+            request()->filled('año') ||
+            request()->filled('mes') ||
+            request()->filled('fecha_desde') ||
+            request()->filled('fecha_hasta') ||
+            request()->filled('orden')
+        )
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="fw-bold text-success mb-2">Filtros aplicados:</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @php
+                        $baseParams = request()->except([
+                            '_token', 'page'
+                        ]);
+                    @endphp
 
+                    @if(request()->filled('busqueda_general'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['busqueda_general' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #43883D;">
+                            🔍 {{ request('busqueda_general') }} &times;
+                        </a>
+                    @endif
 
-@if (
-    request()->filled('busqueda_general') ||
-    request()->filled('concept_type_id') ||
-    request()->filled('concept_theme_id') ||
-    request()->filled('tipo_documento') ||
-    request()->filled('año') ||
-    request()->filled('mes') ||
-    request()->filled('fecha_desde') ||
-    request()->filled('fecha_hasta') ||
-    request()->filled('orden')
-)
-    <div class="mt-4 pt-3 border-top">
-        <h6 class="fw-bold text-success mb-2">Filtros aplicados:</h6>
-        <div class="d-flex flex-wrap gap-2">
-            @php
-                $baseParams = request()->except([
-                    '_token', 'page'
-                ]);
-            @endphp
+                    @if(request()->filled('concept_type_id'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_type_id' => null, 'concept_theme_id' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #4E7525;">
+                            Tipo: {{ $conceptTypes->firstWhere('id', request('concept_type_id'))?->nombre }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('busqueda_general'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['busqueda_general' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #43883D;">
-                    🔍 {{ request('busqueda_general') }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('concept_theme_id'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_theme_id' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #6A9739;">
+                            Tema: {{ $temasFiltered->firstWhere('id', request('concept_theme_id'))?->nombre }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('concept_type_id'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_type_id' => null, 'concept_theme_id' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #4E7525;">
-                    Tipo: {{ $conceptTypes->firstWhere('id', request('concept_type_id'))?->nombre }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('tipo_documento'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['tipo_documento' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #7A7A52;">
+                            Documento: {{ request('tipo_documento') }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('concept_theme_id'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_theme_id' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #6A9739;">
-                    Tema: {{ $temasFiltered->firstWhere('id', request('concept_theme_id'))?->nombre }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('año'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['año' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #B2B700;">
+                            Año: {{ request('año') }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('tipo_documento'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['tipo_documento' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #7A7A52;">
-                    Documento: {{ request('tipo_documento') }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('mes'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['mes' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #CCCC00;">
+                            Mes: {{ \Carbon\Carbon::create()->month(request('mes'))->translatedFormat('F') }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('año'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['año' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #B2B700;">
-                    Año: {{ request('año') }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('fecha_desde'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_desde' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #878D47;">
+                            Desde: {{ request('fecha_desde') }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('mes'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['mes' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #CCCC00;">
-                    Mes: {{ \Carbon\Carbon::create()->month(request('mes'))->translatedFormat('F') }} &times;
-                </a>
-            @endif
+                    @if(request()->filled('fecha_hasta'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_hasta' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #878D47;">
+                            Hasta: {{ request('fecha_hasta') }} &times;
+                        </a>
+                    @endif
 
-            @if(request()->filled('fecha_desde'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_desde' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #878D47;">
-                    Desde: {{ request('fecha_desde') }} &times;
-                </a>
-            @endif
-
-            @if(request()->filled('fecha_hasta'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['fecha_hasta' => null])) }}"
-                   class="badge text-white"
-                   style="background-color: #878D47;">
-                    Hasta: {{ request('fecha_hasta') }} &times;
-                </a>
-            @endif
-
-            @if(request()->filled('orden'))
-                <a href="{{ route('concepts.public', array_merge($baseParams, ['orden' => null])) }}"
-                   class="badge text-dark bg-light border border-secondary">
-                    Orden: {{
-                        match(request('orden')) {
-                            'fecha_desc' => 'Más reciente',
-                            'fecha_asc' => 'Más antiguo',
-                            'titulo_asc' => 'Título A-Z',
-                            'titulo_desc' => 'Título Z-A',
-                            default => request('orden')
-                        }
-                    }} &times;
-                </a>
-            @endif
-        </div>
-    </div>
-@endif
-
-
-<br>
-<!-- Loader -->
-
+                    @if(request()->filled('orden'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['orden' => null])) }}"
+                           class="badge text-dark bg-light border border-secondary">
+                            Orden: {{
+                                match(request('orden')) {
+                                    'fecha_desc' => 'Más reciente',
+                                    'fecha_asc' => 'Más antiguo',
+                                    'titulo_asc' => 'Título A-Z',
+                                    'titulo_desc' => 'Título Z-A',
+                                    default => request('orden')
+                                }
+                            }} &times;
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <!-- Listado de conceptos -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
@@ -521,120 +656,153 @@
                             </div>
                         </div>
                     </article>
+                    
                 @endforeach
+                
             @else
                 <div class="col-12 text-center py-5">
                     <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
                         <i class="fas fa-book-open"></i>
                     </div>
                     <h3>No hay conceptos disponibles</h3>
-                    <p class="text-muted mt-3">Utilice los filtros para buscar conceptos o intente más tarde.</p>
+                    <p class="text-muted mt-3">
+                        @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
+                            No se encontraron conceptos que coincidan con los filtros aplicados. 
+                            <a href="{{ route('concepts.public') }}" class="text-decoration-none" style="color: #43883d;">Limpiar filtros</a>
+                        @else
+                            Utilice los filtros para buscar conceptos o intente más tarde.
+                        @endif
+                    </p>
                 </div>
             @endif
         </div>
+
+        <!-- SECCIÓN DE PAGINACIÓN MEJORADA -->
+        @if($concepts->hasPages())
+            <div class="pagination-container">
+
+
+                <!-- Enlaces de paginación -->
+                <div class="d-flex justify-content-center">
+                    {{ $concepts->appends(request()->query())->links('pagination::bootstrap-4') }}
+                </div>
+            </div>
+        @endif
+        
     </div>
+
     {{-- FIN SECCIÓN PRINCIPAL --}}
 
- {{-- fOOTER   --}}
-  <span id="final"></span>
-  <div class="govco-footer mt-5">
-    <div class="row govco-portales-contenedor m-0">
-      <div class="col-4 govco-footer-logo-portal">
-        <div class="govco-logo-container-portal">
-          <span class="govco-logo"></span>
-          <span class="govco-separator"></span>
-          <span class="govco-co"></span>
-        </div>
-      </div>
-      <div class="col-4 govco-info-datos-portal">
-        <div class="govco-separator-rows"></div>
-        <div class="govco-texto-datos-portal">
-          <p class="govco-text-header-portal-1">
-            Nombre completo del portal
-          </p>
-          <p>Dirección: xxxxxx xxx xxx Departamento y municipio. <br>
-            Código Postal: xxxx <br>
-            Horario de atención: Lunes a viernes xx:xx a.m. - xx:xx p.m.</p>
-        </div>
-        <div class="govco-network extramt-network">
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-twitter-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-instagram-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-facebook-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-        </div>
-      </div>
+    {{-- FOOTER --}}
+    <span id="final"></span>
+    <div class="govco-footer mt-5">
+        <div class="row govco-portales-contenedor m-0">
+            <div class="col-4 govco-footer-logo-portal">
+                <div class="govco-logo-container-portal">
+                    <span class="govco-logo"></span>
+                    <span class="govco-separator"></span>
+                    <span class="govco-co"></span>
+                </div>
+            </div>
+            <div class="col-4 govco-info-datos-portal">
+                <div class="govco-separator-rows"></div>
+                <div class="govco-texto-datos-portal">
+                    <p class="govco-text-header-portal-1">
+                        Nombre completo del portal
+                    </p>
+                    <p>Dirección: xxxxxx xxx xxx Departamento y municipio. <br>
+                        Código Postal: xxxx <br>
+                        Horario de atención: Lunes a viernes xx:xx a.m. - xx:xx p.m.</p>
+                </div>
+                <div class="govco-network extramt-network">
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-twitter-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-instagram-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-facebook-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                </div>
+            </div>
 
-      <div class="col-4 govco-info-telefonos">
-        <div class="govco-separator-rows"></div>
-        <div class="govco-texto-telefonos">
-          <p class="govco-text-header-portal-1">
-            <span class="govco-phone-alt"></span>
-            Contacto
-          </p>
-          <p>Teléfono conmutador: <br>
-            +57(xx) xxx xx xx <br>
-            Línea gratuita: 01-800-xxxxxxxx <br>
-            Línea anticorrupción: 01-800-xxxxxxxx <br>
-            Correo institucional: <br>
-            entidad@entidad.gov.co</p>
-        </div>
+            <div class="col-4 govco-info-telefonos">
+                <div class="govco-separator-rows"></div>
+                <div class="govco-texto-telefonos">
+                    <p class="govco-text-header-portal-1">
+                        <span class="govco-phone-alt"></span>
+                        Contacto
+                    </p>
+                    <p>Teléfono conmutador: <br>
+                        +57(xx) xxx xx xx <br>
+                        Línea gratuita: 01-800-xxxxxxxx <br>
+                        Línea anticorrupción: 01-800-xxxxxxxx <br>
+                        Correo institucional: <br>
+                        entidad@entidad.gov.co</p>
+                </div>
 
-        <div class="govco-links-portal-container">
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Políticas</a>
-            <a class="govco-link-portal" href="#">Mapa del sitio</a>
-          </div>
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Términos y condiciones</a> <br>
-          </div>
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Accesibilidad</a>
-          </div>
+                <div class="govco-links-portal-container">
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Políticas</a>
+                        <a class="govco-link-portal" href="#">Mapa del sitio</a>
+                    </div>
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Términos y condiciones</a> <br>
+                    </div>
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Accesibilidad</a>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const typeSel  = document.getElementById('concept_type_id');
-  const themeSel = document.getElementById('concept_theme_id');
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const typeSel  = document.getElementById('concept_type_id');
+        const themeSel = document.getElementById('concept_theme_id');
 
-  async function loadThemes(typeId){
-     themeSel.innerHTML = '<option value="">Cargando temas...</option>';
-     try {
-       const r = await fetch(`/api/concept-themes-by-type/${typeId}`);
-       const list = await r.json();
-       themeSel.innerHTML = '<option value="">Todos los temas</option>';
-       list.forEach(t => {
-          const opt = new Option(t.nombre, t.id, false, t.id == '{{ request('concept_theme_id') }}');
-          themeSel.add(opt);
-       });
-     } catch (error) {
-       themeSel.innerHTML = '<option value="">Error al cargar temas</option>';
-     }
-  }
+        async function loadThemes(typeId){
+            themeSel.innerHTML = '<option value="">Cargando temas...</option>';
+            try {
+                const r = await fetch(`/api/concept-themes-by-type/${typeId}`);
+                const list = await r.json();
+                themeSel.innerHTML = '<option value="">Todos los temas</option>';
+                list.forEach(t => {
+                    const opt = new Option(t.nombre, t.id, false, t.id == '{{ request('concept_theme_id') }}');
+                    themeSel.add(opt);
+                });
+            } catch (error) {
+                themeSel.innerHTML = '<option value="">Error al cargar temas</option>';
+            }
+        }
 
-  if(typeSel.value) loadThemes(typeSel.value);
-  typeSel.addEventListener('change', e => {
-     if(e.target.value){ 
-       loadThemes(e.target.value); 
-     } else { 
-       themeSel.innerHTML = '<option value="">Todos los temas</option>'; 
-     }
-  });
-});
+        if(typeSel.value) loadThemes(typeSel.value);
+        typeSel.addEventListener('change', e => {
+            if(e.target.value){ 
+                loadThemes(e.target.value); 
+            } else { 
+                themeSel.innerHTML = '<option value="">Todos los temas</option>'; 
+            }
+        });
+    });
 
-</script>
+    </script>
+    <script>
+    function asignarTipoDesdeTema() {
+        const temaSelect = document.getElementById('concept_theme_id');
+        const tipoSelect = document.getElementById('concept_type_id');
+        const selectedOption = temaSelect.options[temaSelect.selectedIndex];
+        const typeId = selectedOption.getAttribute('data-type-id');
+        if (typeId) {
+            tipoSelect.value = typeId;
+        }
+    }
+    </script>
 </body>
 </html>
-
