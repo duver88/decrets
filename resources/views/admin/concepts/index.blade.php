@@ -42,7 +42,280 @@
         </div>
     @endif
 
+    <!-- SECCIÓN DE FILTROS Y BÚSQUEDA -->
+<!-- SECCIÓN DE FILTROS Y BÚSQUEDA -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700">
+    @php
+        $selectedType = request('concept_type_id');
+        $selectedOrder = request('orden', 'fecha_desc');
+        $currentTipoDocumento = request('tipo_documento');
+    @endphp
 
+    <!-- CHIPS DE TIPOS DE DOCUMENTO -->
+    <div class="mb-4">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tipo de Documento:</h4>
+        <div class="flex flex-wrap gap-2">
+            @foreach($tiposDocumento as $tipo)
+                <form method="GET" action="{{ route('concepts.index') }}" class="inline">
+                    @foreach(request()->except(['tipo_documento', 'page']) as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <input type="hidden" name="tipo_documento" value="{{ $tipo }}">
+                    <button type="submit" class="px-3 py-1 text-sm rounded-full transition-colors border {{ $currentTipoDocumento == $tipo ? 'bg-[#43883d] text-white border-[#43883d]' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                        {{ $tipo }} ({{ $stats['por_tipo_documento'][$tipo] ?? 0 }})
+                    </button>
+                </form>
+            @endforeach
+            <form method="GET" action="{{ route('concepts.index') }}" class="inline">
+                @foreach(request()->except(['tipo_documento', 'page']) as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <button type="submit" class="px-3 py-1 text-sm rounded-full transition-colors border {{ !$currentTipoDocumento ? 'bg-[#43883d] text-white border-[#43883d]' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                    Todos
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CHIPS DE TIPOS DE CONCEPTO -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tipo de Concepto:</h4>
+        <div class="flex flex-wrap gap-2">
+            @foreach($conceptTypes as $tipo)
+                <form method="GET" action="{{ route('concepts.index') }}" class="inline">
+                    @foreach(request()->except(['concept_type_id', 'page']) as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <input type="hidden" name="concept_type_id" value="{{ $tipo->id }}">
+                    <button type="submit" class="px-3 py-1 text-sm rounded-full transition-colors border {{ $selectedType == $tipo->id ? 'bg-[#43883d] text-white border-[#43883d]' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                        {{ $tipo->nombre }}
+                    </button>
+                </form>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- FORMULARIO DE BÚSQUEDA Y FILTROS PRINCIPALES -->
+    <form method="GET" action="{{ route('concepts.index') }}" class="space-y-4">
+        <!-- BUSCADOR GENERAL -->
+        <div class="flex gap-2">
+            <div class="flex-1">
+                <input type="search" 
+                       name="busqueda_general" 
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d] placeholder-gray-500 dark:placeholder-gray-400"
+                       placeholder="Buscar por título, contenido, año..." 
+                       value="{{ request('busqueda_general') }}">
+            </div>
+            <button type="submit" class="px-6 py-2 bg-[#43883d] text-white rounded-md hover:bg-[#3F8827] transition focus:outline-none focus:ring-4 focus:ring-[#93C01F]/50">
+                Buscar
+            </button>
+        </div>
+
+        <!-- FILTROS PRINCIPALES -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Ordenamiento -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ordenar por:</label>
+                <select name="orden" 
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]" 
+                        onchange="this.form.submit()">
+                    <option value="fecha_desc" {{ request('orden') == 'fecha_desc' ? 'selected' : '' }}>Más recientes</option>
+                    <option value="fecha_asc" {{ request('orden') == 'fecha_asc' ? 'selected' : '' }}>Más antiguos</option>
+                    <option value="titulo_asc" {{ request('orden') == 'titulo_asc' ? 'selected' : '' }}>Título A-Z</option>
+                    <option value="titulo_desc" {{ request('orden') == 'titulo_desc' ? 'selected' : '' }}>Título Z-A</option>
+                </select>
+            </div>
+
+            <!-- Tipo de Concepto -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Concepto:</label>
+                <select name="concept_type_id" 
+                        id="concept_type_id" 
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]">
+                    <option value="">Todos</option>
+                    @foreach($conceptTypes as $tipo)
+                        <option value="{{ $tipo->id }}" {{ request('concept_type_id') == $tipo->id ? 'selected' : '' }}>
+                            {{ $tipo->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Tema específico -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tema específico:</label>
+                <select name="concept_theme_id" 
+                        id="concept_theme_id" 
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]">
+                    <option value="">Todos</option>
+                    @foreach($conceptThemes as $tema)
+                        <option value="{{ $tema->id }}" data-type-id="{{ $tema->concept_type_id }}"
+                            {{ request('concept_theme_id') == $tema->id ? 'selected' : '' }}>
+                            {{ $tema->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Año -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Año:</label>
+                <select name="año" 
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]">
+                    <option value="">Todos</option>
+                    @foreach($años as $a)
+                        <option value="{{ $a }}" {{ request('año') == $a ? 'selected' : '' }}>{{ $a }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <!-- FILTROS AVANZADOS (COLAPSABLES) -->
+        <div class="border-t pt-4 border-gray-200 dark:border-gray-600">
+            <button type="button" id="toggle-advanced" class="text-[#43883d] text-sm font-medium hover:text-[#3F8827] transition focus:outline-none">
+                <span id="toggle-text">Mostrar filtros avanzados</span>
+                <svg id="toggle-icon" class="inline w-4 h-4 ml-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <div id="advanced-filters" class="mt-4 space-y-4 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Tipo de Documento -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Documento:</label>
+                        <select name="tipo_documento" 
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]">
+                            <option value="">Todos</option>
+                            @foreach($tiposDocumento as $tipo)
+                                <option value="{{ $tipo }}" {{ request('tipo_documento') == $tipo ? 'selected' : '' }}>
+                                    {{ $tipo }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Fecha desde -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha desde:</label>
+                        <input type="date" 
+                               name="fecha_desde" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]" 
+                               value="{{ request('fecha_desde') }}">
+                    </div>
+
+                    <!-- Fecha hasta -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha hasta:</label>
+                        <input type="date" 
+                               name="fecha_hasta" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]" 
+                               value="{{ request('fecha_hasta') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN GLOBALES (Fuera de filtros avanzados) -->
+        <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+            <div class="flex gap-2 justify-end">
+                <a href="{{ route('concepts.index') }}" 
+                   class="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-md hover:bg-gray-600 dark:hover:bg-gray-700 transition focus:outline-none focus:ring-4 focus:ring-gray-500/50">
+                    Limpiar filtros
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 bg-[#43883d] text-white rounded-md hover:bg-[#3F8827] transition focus:outline-none focus:ring-4 focus:ring-[#93C01F]/50">
+                    Aplicar filtros
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- FILTROS APLICADOS -->
+    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta', 'orden']))
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <h6 class="text-sm font-semibold text-[#43883d] mb-2">Filtros aplicados:</h6>
+            <div class="flex flex-wrap gap-2">
+                @php
+                    $baseParams = request()->except(['_token', 'page']);
+                @endphp
+
+                @if(request()->filled('busqueda_general'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['busqueda_general' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-[#43883d] text-white text-xs rounded-full hover:bg-[#3F8827] transition">
+                        🔍 {{ request('busqueda_general') }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('concept_type_id'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['concept_type_id' => null, 'concept_theme_id' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-[#3F8827] text-white text-xs rounded-full hover:bg-[#285F19] transition">
+                        Tipo: {{ $conceptTypes->firstWhere('id', request('concept_type_id'))?->nombre }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('concept_theme_id'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['concept_theme_id' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-[#6A9739] text-white text-xs rounded-full hover:bg-[#5A8629] transition">
+                        Tema: {{ $conceptThemes->firstWhere('id', request('concept_theme_id'))?->nombre }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('tipo_documento'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['tipo_documento' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-gray-600 dark:bg-gray-500 text-white text-xs rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition">
+                        Documento: {{ request('tipo_documento') }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('año'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['año' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-yellow-600 dark:bg-yellow-500 text-white text-xs rounded-full hover:bg-yellow-700 dark:hover:bg-yellow-600 transition">
+                        Año: {{ request('año') }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('fecha_desde'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['fecha_desde' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-indigo-600 dark:bg-indigo-500 text-white text-xs rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-600 transition">
+                        Desde: {{ request('fecha_desde') }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+
+                @if(request()->filled('fecha_hasta'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['fecha_hasta' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-indigo-600 dark:bg-indigo-500 text-white text-xs rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-600 transition">
+                        Hasta: {{ request('fecha_hasta') }}
+                        <span class="ml-1">×</span>
+                    </a>
+                @endif
+            </div>
+        </div>
+    @endif
+</div>
+
+    <!-- INFORMACIÓN DE RESULTADOS -->
+    @if($concepts->total() > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Mostrando <span class="font-semibold text-[#43883d]">{{ $concepts->firstItem() }}</span> 
+                    a <span class="font-semibold text-[#43883d]">{{ $concepts->lastItem() }}</span> 
+                    de <span class="font-semibold text-[#43883d]">{{ $concepts->total() }}</span> resultados
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Página <span class="font-semibold text-[#43883d]">{{ $concepts->currentPage() }}</span> 
+                    de <span class="font-semibold text-[#43883d]">{{ $concepts->lastPage() }}</span>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Lista de conceptos con diseño actualizado -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,7 +367,7 @@
                         </div>
                         <h3 class="text-lg font-ubuntu font-semibold text-gray-900 dark:text-gray-100 hover:text-[#43883d] transition">
                             <a href="{{ route('concepts.show', $concept->id) }}" class="block">
-                                {{ $concept->tipo_documento ?? 'Documento' }}: <Noscript></Noscript> {{ $concept->titulo }} del {{$concept->año}}
+                                {{ $concept->tipo_documento ?? 'Documento' }}: No {{ $concept->titulo }} del {{$concept->año}}
                             </a>
                         </h3>
                         <p class="text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 font-ubuntu text-sm">{{ $concept->contenido }}</p>
@@ -143,12 +416,166 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
-                <p class="text-gray-500 dark:text-gray-400 font-ubuntu mb-6">No hay conceptos para mostrar.</p>
+                <p class="text-gray-500 dark:text-gray-400 font-ubuntu mb-6">
+                    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
+                        No se encontraron conceptos que coincidan con los filtros aplicados.
+                        <br><a href="{{ route('concepts.index') }}" class="text-[#43883d] hover:text-[#3F8827] underline">Limpiar filtros</a>
+                    @else
+                        No hay conceptos para mostrar.
+                    @endif
+                </p>
+                @if(!request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
                 <a href="{{ route('concepts.create') }}" class="inline-block px-6 py-3 bg-[#43883d] text-white rounded-md shadow hover:bg-[#3F8827] transition font-ubuntu">
                     Crear el primer concepto
                 </a>
+                @endif
             </div>
         @endforelse
     </div>
+
+    <!-- PAGINACIÓN MEJORADA -->
+    @if($concepts->hasPages())
+        <div class="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-8 shadow-lg">
+
+
+            <!-- Enlaces de paginación con estilo personalizado -->
+            <div class="flex justify-center">
+                <nav class="flex items-center gap-1" role="navigation" aria-label="Pagination Navigation">
+                    {{-- Previous Page Link --}}
+                    @if ($concepts->onFirstPage())
+                        <span class="px-4 py-3 text-gray-400 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </span>
+                    @else
+                        <a href="{{ $concepts->appends(request()->query())->previousPageUrl() }}" 
+                           class="px-4 py-3 bg-white text-[#43883d] border border-gray-300 rounded-lg hover:bg-[#43883d] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </a>
+                    @endif
+
+                    {{-- Pagination Elements --}}
+                    @foreach ($concepts->appends(request()->query())->getUrlRange(1, $concepts->lastPage()) as $page => $url)
+                        @if ($page == $concepts->currentPage())
+                            <span class="px-4 py-3 bg-[#43883d] text-white border border-[#43883d] rounded-lg font-semibold shadow-md transform -translate-y-0.5">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $url }}" 
+                               class="px-4 py-3 bg-white text-[#43883d] border border-gray-300 rounded-lg hover:bg-[#43883d] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endforeach
+
+                    {{-- Next Page Link --}}
+                    @if ($concepts->hasMorePages())
+                        <a href="{{ $concepts->appends(request()->query())->nextPageUrl() }}" 
+                           class="px-4 py-3 bg-white text-[#43883d] border border-gray-300 rounded-lg hover:bg-[#43883d] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    @else
+                        <span class="px-4 py-3 text-gray-400 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </span>
+                    @endif
+                </nav>
+            </div>
+        </div>
+    @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle para filtros avanzados
+    const toggleBtn = document.getElementById('toggle-advanced');
+    const advancedFilters = document.getElementById('advanced-filters');
+    const toggleText = document.getElementById('toggle-text');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    if (toggleBtn && advancedFilters) {
+        toggleBtn.addEventListener('click', function() {
+            const isHidden = advancedFilters.classList.contains('hidden');
+            
+            if (isHidden) {
+                advancedFilters.classList.remove('hidden');
+                toggleText.textContent = 'Ocultar filtros avanzados';
+                toggleIcon.style.transform = 'rotate(180deg)';
+            } else {
+                advancedFilters.classList.add('hidden');
+                toggleText.textContent = 'Mostrar filtros avanzados';
+                toggleIcon.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
+    // Manejo de temas por tipo de concepto
+    const typeSelect = document.getElementById('concept_type_id');
+    const themeSelect = document.getElementById('concept_theme_id');
+
+    if (typeSelect && themeSelect) {
+        async function loadThemes(typeId) {
+            if (!typeId) {
+                // Restaurar todas las opciones originales
+                const allOptions = themeSelect.querySelectorAll('option');
+                allOptions.forEach(option => {
+                    option.style.display = 'block';
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/concept-themes-by-type/${typeId}`);
+                const themes = await response.json();
+                
+                // Ocultar todas las opciones excepto "Todos"
+                const allOptions = themeSelect.querySelectorAll('option');
+                allOptions.forEach(option => {
+                    if (option.value === '') {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+
+                // Mostrar solo los temas del tipo seleccionado
+                themes.forEach(theme => {
+                    const option = themeSelect.querySelector(`option[value="${theme.id}"]`);
+                    if (option) {
+                        option.style.display = 'block';
+                    }
+                });
+
+                // Si el tema actual no pertenece al tipo seleccionado, resetear
+                const currentTheme = themeSelect.value;
+                if (currentTheme) {
+                    const currentOption = themeSelect.querySelector(`option[value="${currentTheme}"]`);
+                    if (currentOption && currentOption.style.display === 'none') {
+                        themeSelect.value = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading themes:', error);
+            }
+        }
+
+        typeSelect.addEventListener('change', function() {
+            loadThemes(this.value);
+        });
+
+        // Cargar temas al inicializar si hay un tipo seleccionado
+        if (typeSelect.value) {
+            loadThemes(typeSelect.value);
+        }
+    }
+});
+</script>
+
 @endsection

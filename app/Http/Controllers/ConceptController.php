@@ -11,27 +11,157 @@ use Illuminate\Support\Facades\Storage;
 class ConceptController extends Controller
 {
    // Lista de conceptos
-    public function index()
-    {
-        if (auth()->user()->is_admin) {
-            // Admin ve todos los conceptos
-            $concepts = Concept::with(['conceptType', 'conceptTheme', 'user'])
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            // Usuarios regulares ven conceptos según permisos
-            $conceptTypeIds = auth()->user()->conceptTypes()
-                ->pluck('concept_types.id')
-                ->toArray();
-            
-            $concepts = Concept::with(['conceptType', 'conceptTheme', 'user'])
-                ->whereIn('concept_type_id', $conceptTypeIds)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-        return view('admin.concepts.index', compact('concepts'));
+// Lista de conceptos con filtros y paginación para el dashboard admin
+public function index(Request $request)
+{
+    $query = Concept::with(['conceptType', 'conceptTheme', 'user']);
+    
+    // Aplicar filtros según permisos del usuario
+    if (auth()->user()->is_admin) {
+        // Admin ve todos los conceptos
+    } else {
+        // Usuarios regulares ven conceptos según permisos
+        $conceptTypeIds = auth()->user()->conceptTypes()
+            ->pluck('concept_types.id')
+            ->toArray();
+        
+        $query->whereIn('concept_type_id', $conceptTypeIds);
     }
+    
+    // Filtro por tipo de concepto
+    if ($request->filled('concept_type_id')) {
+        $query->where('concept_type_id', $request->concept_type_id);
+    }
+
+    // Filtro por tema específico
+    if ($request->filled('concept_theme_id')) {
+        $query->where('concept_theme_id', $request->concept_theme_id);
+    }
+    
+    // Filtro por tipo de documento (Decreto/Resolución)
+    if ($request->filled('tipo_documento')) {
+        $query->where('tipo_documento', $request->tipo_documento);
+    }
+    
+    // Filtro por año
+    if ($request->filled('año')) {
+        $query->where('año', $request->año);
+    }
+    
+    // Filtros de fecha
+    if ($request->filled('fecha_desde')) {
+        $query->whereDate('fecha', '>=', $request->fecha_desde);
+    }
+
+    if ($request->filled('fecha_hasta')) {
+        $query->whereDate('fecha', '<=', $request->fecha_hasta);
+    }
+
+    // Búsqueda general (busca en título y contenido)
+    if ($request->filled('busqueda_general')) {
+        $busqueda = trim($request->busqueda_general);
+        $query->where(function($q) use ($busqueda) {
+            $q->where('titulo', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('contenido', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('año', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('tipo_documento', 'LIKE', "%{$busqueda}%");
+        });
+    }
+
+    // Ordenamiento
+    $orden = $request->get('orden', 'fecha_desc');
+    switch ($orden) {
+        case 'titulo_asc':
+            $query->orderBy('titulo', 'asc');
+            break;
+        case 'titulo_desc':
+            $query->orderBy('titulo', 'desc');
+            break;
+        case 'año_asc':
+            $query->orderBy('año', 'asc')->orderBy('fecha', 'asc');
+            break;
+        case 'año_desc':
+            $query->orderBy('año', 'desc')->orderBy('fecha', 'desc');
+            break;
+        case 'fecha_asc':
+            $query->orderBy('fecha', 'asc');
+            break;
+        case 'tipo_asc':
+            $query->join('concept_types', 'concepts.concept_type_id', '=', 'concept_types.id')
+                  ->orderBy('concept_types.nombre', 'asc')
+                  ->orderBy('concepts.fecha', 'desc')
+                  ->select('concepts.*');
+            break;
+        case 'tema_asc':
+            $query->join('concept_themes', 'concepts.concept_theme_id', '=', 'concept_themes.id')
+                  ->orderBy('concept_themes.nombre', 'asc')
+                  ->orderBy('concepts.fecha', 'desc')
+                  ->select('concepts.*');
+            break;
+        case 'tipo_documento_asc':
+            $query->orderBy('tipo_documento', 'asc')->orderBy('fecha', 'desc');
+            break;
+        default: // fecha_desc
+            $query->orderBy('fecha', 'desc');
+    }
+
+    // PAGINACIÓN FIJA DE 10 ELEMENTOS
+    $concepts = $query->paginate(10)->withQueryString();
+
+    // Datos adicionales para los filtros
+    if (auth()->user()->is_admin) {
+        $conceptTypes = ConceptType::orderBy('nombre')->get();
+    } else {
+        $conceptTypeIds = auth()->user()->conceptTypes()
+            ->pluck('concept_types.id')
+            ->toArray();
+        $conceptTypes = ConceptType::whereIn('id', $conceptTypeIds)
+                                 ->orderBy('nombre')
+                                 ->get();
+    }
+    
+    $conceptThemes = ConceptTheme::with('conceptType')->orderBy('nombre')->get();
+    $años = Concept::distinct()->orderBy('año', 'desc')->pluck('año')->filter();
+    $tiposDocumento = ['Decreto', 'Resolución'];
+
+    // Estadísticas para los chips
+    $baseStatsQuery = Concept::query();
+    
+    if (!auth()->user()->is_admin) {
+        $conceptTypeIds = auth()->user()->conceptTypes()
+            ->pluck('concept_types.id')
+            ->toArray();
+        $baseStatsQuery->whereIn('concept_type_id', $conceptTypeIds);
+    }
+    
+    $stats = [
+        'total' => $baseStatsQuery->count(),
+        'por_tipo' => ConceptType::withCount(['concepts' => function($query) {
+            if (!auth()->user()->is_admin) {
+                $conceptTypeIds = auth()->user()->conceptTypes()
+                    ->pluck('concept_types.id')
+                    ->toArray();
+                $query->whereIn('concept_type_id', $conceptTypeIds);
+            }
+        }])->get(),
+        'por_año' => $baseStatsQuery->selectRaw('año, COUNT(*) as count')
+                                   ->groupBy('año')
+                                   ->orderBy('año', 'desc')
+                                   ->pluck('count', 'año'),
+        'por_tipo_documento' => $baseStatsQuery->selectRaw('tipo_documento, COUNT(*) as count')
+                                              ->groupBy('tipo_documento')
+                                              ->pluck('count', 'tipo_documento'),
+    ];
+
+    return view('admin.concepts.index', compact(
+        'concepts', 
+        'conceptTypes', 
+        'conceptThemes',
+        'años', 
+        'tiposDocumento',
+        'stats'
+    ));
+}
 
     // Formulario para crear concepto
 public function create(Request $request)
