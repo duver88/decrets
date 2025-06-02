@@ -176,21 +176,158 @@ class DocumentController extends Controller
     }
 
     // Dashboard - listado de documentos para admin
-    public function index()
-    {
-        if (auth()->user()->is_admin) {  
-        // Admin sees all documents  
-        $documents = Document::orderBy('fecha', 'desc')->get();  
-        return view('admin.dashboard', compact('documents'));  
-    } else {  
-        // Regular users only see documents from categories they have permissions for  
-        $categoryIds = auth()->user()->categoryPermissions()->pluck('category_id')->toArray();  
-        $documents = Document::whereIn('category_id', $categoryIds)  
-                           ->orderBy('fecha', 'desc')  
-                           ->get();  
-        return view('users.dashboard', compact('documents'));  
-    }  
+public function index(Request $request)
+{
+    $query = Document::with('category');
+
+    /* --- FILTROS (mismos que listPublic()) --- */
+    
+    // Filtro por tipo de documento
+    if ($request->filled('tipo')) {
+        $query->where('tipo', $request->tipo);
     }
+
+    // Filtro por número (búsqueda parcial mejorada)
+    if ($request->filled('numero')) {
+        $numero = trim($request->numero);
+        $query->where('numero', 'LIKE', '%' . $numero . '%');
+    }
+
+    // Filtro por nombre (incluye búsqueda en tipo también)
+    if ($request->filled('nombre')) {
+        $nombre = trim($request->nombre);
+        $query->where(function($q) use ($nombre) {
+            $q->where('nombre', 'LIKE', '%' . $nombre . '%')
+              ->orWhere('tipo', 'LIKE', '%' . $nombre . '%');
+        });
+    }
+
+    // Filtro por categoría
+    if ($request->filled('category_id')) {
+        $query->where('category_id', $request->category_id);
+    }
+
+    // Filtros de fecha mejorados
+    if ($request->filled('fecha_desde')) {
+        $query->whereDate('fecha', '>=', $request->fecha_desde);
+    }
+
+    if ($request->filled('fecha_hasta')) {
+        $query->whereDate('fecha', '<=', $request->fecha_hasta);
+    }
+
+    // Filtro por fecha exacta (mantener compatibilidad)
+    if ($request->filled('fecha') && !$request->filled('fecha_desde') && !$request->filled('fecha_hasta')) {
+        $query->whereDate('fecha', $request->fecha);
+    }
+
+    // Filtro por año (filtra por nombre del documento)
+    if ($request->filled('año')) {
+        $año = trim($request->año);
+        $query->where('nombre', 'LIKE', '%' . $año . '%');
+    }
+
+    // Filtro por mes (usar fecha de publicación)
+    if ($request->filled('mes') && $request->filled('año')) {
+        $mes = (int) $request->mes;
+        $año = trim($request->año);
+        
+        // Validar que mes esté entre 1 y 12
+        if ($mes >= 1 && $mes <= 12 && !empty($año)) {
+            $query->whereMonth('fecha', $mes)
+                  ->where('nombre', 'LIKE', '%' . $año . '%');
+        }
+    }
+
+    // Búsqueda general (busca en nombre, número, descripción y tipo)
+    if ($request->filled('busqueda_general')) {
+        $busqueda = trim($request->busqueda_general);
+        $query->where(function($q) use ($busqueda) {
+            $q->where('nombre', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('numero', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('descripcion', 'LIKE', '%' . $busqueda . '%')
+              ->orWhere('tipo', 'LIKE', "%{$busqueda}%");
+        });
+    }
+
+    /* --- ORDENAMIENTO --- */
+    $orden = $request->get('orden', 'fecha_desc');
+    switch ($orden) {
+        case 'numero_asc':
+            $query->orderBy('numero', 'asc');
+            break;
+        case 'numero_desc':
+            $query->orderBy('numero', 'desc');
+            break;
+        case 'nombre_asc':
+            $query->orderBy('nombre', 'asc');
+            break;
+        case 'nombre_desc':
+            $query->orderBy('nombre', 'desc');
+            break;
+        case 'fecha_asc':
+            $query->orderBy('fecha', 'asc');
+            break;
+        case 'tipo_asc':
+            $query->orderBy('tipo', 'asc')->orderBy('fecha', 'desc');
+            break;
+        case 'categoria_asc':
+            $query->join('categories', 'documents.category_id', '=', 'categories.id')
+                  ->orderBy('categories.nombre', 'asc')
+                  ->orderBy('documents.fecha', 'desc')
+                  ->select('documents.*');
+            break;
+        default: // fecha_desc
+            $query->orderBy('fecha', 'desc');
+    }
+
+    /* --- PERMISOS (solo si no es admin) --- */
+    if (!auth()->user()->is_admin) {
+        $allowed = auth()->user()->categoryPermissions()->pluck('category_id');
+        $query->whereIn('category_id', $allowed);
+    }
+
+    // Paginación
+    $documents = $query->paginate(10)->withQueryString();
+
+    // Datos adicionales para los filtros
+    $categories = Category::orderBy('nombre')->get();
+    $tipos = Document::distinct()->pluck('tipo')->filter()->sort()->values();
+    
+    // Obtener años únicos del nombre del documento
+    $años = Document::selectRaw('SUBSTRING(nombre, LOCATE("2", nombre), 4) as año')
+                   ->distinct()
+                   ->whereRaw('nombre REGEXP "[0-9]{4}"')
+                   ->orderBy('año', 'desc')
+                   ->pluck('año')
+                   ->filter()
+                   ->unique()
+                   ->values();
+
+    // Estadísticas para que coincidan con la vista
+    $stats = [
+        'total' => Document::count(),
+        'por_tipo' => Document::selectRaw('tipo, COUNT(*) as count')
+                             ->groupBy('tipo')
+                             ->pluck('count', 'tipo'),
+        'por_categoria' => Category::withCount('documents')->get(),
+        'por_año' => Document::selectRaw('SUBSTRING(nombre, LOCATE("2", nombre), 4) as año, COUNT(*) as count')
+                           ->whereRaw('nombre REGEXP "[0-9]{4}"')
+                           ->groupBy('año')
+                           ->orderBy('año', 'desc')
+                           ->pluck('count', 'año'),
+        'ultimos_30_dias' => Document::where('fecha', '>=', now()->subDays(30))->count(),
+    ];
+
+    return view('admin.dashboard', compact(
+        'documents', 
+        'categories', 
+        'tipos', 
+        'años', 
+        'stats'
+    ));
+}
+
 
     // Formulario para crear documento
     public function create()
