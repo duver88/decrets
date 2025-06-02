@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // Ruta auxiliar para obtener temas (alternativa sin prefijo para depuración)
 Route::get('/get-themes/{typeId}', [ConceptController::class, 'getThemes'])->name('direct.getThemes');
+Route::get('/documents', [DocumentController::class, 'listPublic'])->name('documents.public');
 
 // Rutas para filtros AJAX de Conceptos
 Route::get('/api/concept-themes-by-type/{typeId}', [ConceptController::class, 'getThemesByType'])

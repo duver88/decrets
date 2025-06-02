@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Storage;
 class DocumentController extends Controller
 {
     // Método para la vista pública
-
-    public function listPublic(Request $request)
+ // Método para la vista pública con filtros mejorados
+ public function listPublic(Request $request)
     {
         $query = Document::with('category');
 
@@ -26,10 +26,13 @@ class DocumentController extends Controller
             $query->where('numero', 'LIKE', '%' . $numero . '%');
         }
 
-        // Filtro por nombre (búsqueda parcial mejorada)
+        // CORREGIDO: Filtro por nombre (incluye búsqueda en tipo también)
         if ($request->filled('nombre')) {
             $nombre = trim($request->nombre);
-            $query->where('nombre', 'LIKE', '%' . $nombre . '%');
+            $query->where(function($q) use ($nombre) {
+                $q->where('nombre', 'LIKE', '%' . $nombre . '%')
+                  ->orWhere('tipo', 'LIKE', '%' . $nombre . '%');
+            });
         }
 
         // Filtro por categoría
@@ -51,23 +54,32 @@ class DocumentController extends Controller
             $query->whereDate('fecha', $request->fecha);
         }
 
-        // Filtro por año
+        // CAMBIADO: Filtro por año ahora filtra por nombre del documento
         if ($request->filled('año')) {
-            $query->whereYear('fecha', $request->año);
+            $año = trim($request->año);
+            $query->where('nombre', 'LIKE', '%' . $año . '%');
         }
 
-        // Filtro por mes (si se proporciona año)
+        // CORREGIDO: Filtro por mes (usar fecha de publicación)
         if ($request->filled('mes') && $request->filled('año')) {
-            $query->whereMonth('fecha', $request->mes);
+            $mes = (int) $request->mes;
+            $año = trim($request->año);
+            
+            // Validar que mes esté entre 1 y 12
+            if ($mes >= 1 && $mes <= 12 && !empty($año)) {
+                $query->whereMonth('fecha', $mes)
+                      ->where('nombre', 'LIKE', '%' . $año . '%');
+            }
         }
 
-        // Búsqueda general (busca en nombre, número y descripción)
+        // AGREGADO: Búsqueda general (busca en nombre, número, descripción y tipo)
         if ($request->filled('busqueda_general')) {
             $busqueda = trim($request->busqueda_general);
             $query->where(function($q) use ($busqueda) {
                 $q->where('nombre', 'LIKE', '%' . $busqueda . '%')
                   ->orWhere('numero', 'LIKE', '%' . $busqueda . '%')
-                  ->orWhere('descripcion', 'LIKE', '%' . $busqueda . '%');
+                  ->orWhere('descripcion', 'LIKE', '%' . $busqueda . '%')
+                  ->orWhere('tipo', 'LIKE', "%{$busqueda}%");
             });
         }
 
@@ -102,32 +114,37 @@ class DocumentController extends Controller
                 $query->orderBy('fecha', 'desc');
         }
 
-        // Paginación opcional
-        if ($request->filled('per_page') && in_array($request->per_page, [10, 25, 50, 100])) {
-            $documents = $query->paginate($request->per_page)->withQueryString();
-        } else {
-            $documents = $query->get();
-        }
+        // CAMBIADO: Siempre usar paginación de 10 elementos
+        $documents = $query->paginate(10)->withQueryString();
 
         // Datos adicionales para los filtros
         $categories = Category::orderBy('nombre')->get();
         $tipos = Document::distinct()->pluck('tipo')->filter()->sort()->values();
-        $años = Document::selectRaw('YEAR(fecha) as año')
+        
+        // CAMBIADO: Obtener años únicos del nombre del documento
+        $años = Document::selectRaw('SUBSTRING(nombre, LOCATE("2", nombre), 4) as año')
                        ->distinct()
+                       ->whereRaw('nombre REGEXP "[0-9]{4}"')
                        ->orderBy('año', 'desc')
                        ->pluck('año')
-                       ->filter();
+                       ->filter()
+                       ->unique()
+                       ->values();
 
-        // Estadísticas rápidas para mostrar en la vista
+        // CORREGIDO: Estadísticas para que coincidan con la vista
         $stats = [
-            'total' => $query->count(),
+            'total' => Document::count(),
             'por_tipo' => Document::selectRaw('tipo, COUNT(*) as count')
                                  ->groupBy('tipo')
                                  ->pluck('count', 'tipo'),
-            'por_categoria' => Document::join('categories', 'documents.category_id', '=', 'categories.id')
-                                      ->selectRaw('categories.nombre, COUNT(*) as count')
-                                      ->groupBy('categories.nombre')
-                                      ->pluck('count', 'nombre'),
+            // CAMBIADO: Usar withCount para coincidir con el formato esperado en la vista
+            'por_categoria' => Category::withCount('documents')->get(),
+            'por_año' => Document::selectRaw('SUBSTRING(nombre, LOCATE("2", nombre), 4) as año, COUNT(*) as count')
+                               ->whereRaw('nombre REGEXP "[0-9]{4}"')
+                               ->groupBy('año')
+                               ->orderBy('año', 'desc')
+                               ->pluck('count', 'año'),
+            'ultimos_30_dias' => Document::where('fecha', '>=', now()->subDays(30))->count(),
         ];
 
         return view('public.documents', compact(

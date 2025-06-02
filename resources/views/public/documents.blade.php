@@ -37,6 +37,139 @@
         .tab-content.active {
             display: block;
         }
+
+        /* ESTILOS PARA CHIPS DE FILTRADO */
+        .chip {
+            display: inline-block;
+            background-color: #E6F0E5;
+            color: #285F19;
+            padding: 5px 14px;
+            margin: 3px;
+            border-radius: 20px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .chip.active {
+            background-color: #43883d;
+            color: white;
+        }
+
+        .order-option {
+            margin-right: 10px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .order-option.active {
+            color: #285F19;
+            font-weight: 700;
+        }
+
+        .toggle-advanced {
+            color: #285F19;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* ESTILOS MEJORADOS PARA PAGINACIÓN */
+        .pagination-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            margin-top: 40px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .pagination-info {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #e3e6ea;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .pagination-info .badge {
+            background-color: #43883d !important;
+            color: white;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin: 0;
+            gap: 5px;
+        }
+
+        .pagination .page-item {
+            margin: 0 2px;
+        }
+
+        .pagination .page-link {
+            color: #43883d;
+            border: 2px solid #e9ecef;
+            border-radius: 10px !important;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #43883d;
+            border-color: #43883d;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 136, 61, 0.3);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #43883d;
+            border-color: #43883d;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(67, 136, 61, 0.4);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #9ca3af;
+            background-color: #f3f4f6;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 576px) {
+            .pagination-container {
+                padding: 15px;
+                margin-top: 20px;
+            }
+            
+            .pagination .page-link {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 35px;
+            }
+            
+            .pagination-info {
+                text-align: center;
+                padding: 12px 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -133,11 +266,11 @@
     </header>
     {{-- Fin Header --}}
 
-    {{-- SECCIÓN MEJORADA: Sistema de Búsqueda de Normas --}}
+    {{-- SECCIÓN PRINCIPAL: Relatoría de Actos Administrativos --}}
     <div class="container my-5" style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div class="text-center mb-5">
             <h1 class="fw-bold" style="color: #43883d; font-family: 'Ubuntu', sans-serif;">
-               Relatoría de Actos Administrativos
+                Relatoría de Actos Administrativos
                 <small class="d-block fs-5 mt-2 text-muted">Alcaldía de Bucaramanga</small>
             </h1>
         </div>
@@ -146,7 +279,7 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
             <!-- Botón 1: Conoce el sistema de búsqueda -->
             <div class="col">
-                <div class="card h-100 border-0 cursor-pointer sistema-tab" data-tab="conoce-sistema" style="background-color: #43883d; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease;">
+                <div class="card h-100 border-0 cursor-pointer" onclick="window.location.href='{{ route('home') }}'" style="background-color: #43883d; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease;">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
                             <i class="fas fa-info-circle" style="font-size: 2rem;"></i>
@@ -172,7 +305,7 @@
 
             <!-- Botón 3: Relatoría de Actos Administrativos -->
             <div class="col">
-                <div class="card h-100 border-0 cursor-pointer sistema-tab active" data-tab="relatoria-actos" style="background-color: #3F8827; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; border: 2px solid #93C01F;">
+                <div class="card h-100 border-0 cursor-pointer" style="background-color: #3F8827; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; border: 2px solid #93C01F;">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
                             <i class="fas fa-gavel" style="font-size: 2rem;"></i>
@@ -185,7 +318,7 @@
 
             <!-- Botón 4: Relatoría de Circulares -->
             <div class="col">
-                <div class="card h-100 border-0 cursor-pointer sistema-tab" data-tab="relatoria-circulares" style="background-color: #43883d; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease;">
+                <div class="card h-100 border-0 cursor-pointer" onclick="window.location.href='{{ route('home') }}'" style="background-color: #43883d; color: white; border-radius: 10px; overflow: hidden; transition: all 0.3s ease;">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
                             <i class="fas fa-file-alt" style="font-size: 2rem;"></i>
@@ -197,86 +330,333 @@
             </div>
         </div>
 
-        <!-- Contenido de Pestaña 1: Conoce el sistema -->
-        <div id="conoce-sistema-content" class="tab-content bg-white p-4 rounded shadow-sm" style="display: none;">
-            <div class="text-center py-5">
-                <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
-                    <i class="fas fa-info-circle"></i>
-                </div>
-                <h3>Información Próximamente</h3>
-                <p class="text-muted mt-3">Estamos trabajando para brindarle más información sobre el Sistema de Búsqueda de Normas. <br>Por favor, vuelva a consultar más tarde.</p>
-            </div>
+        <!-- FORMULARIO MEJORADO CON FILTROS AVANZADOS -->
+        @php
+            $selectedTipo = request('tipo');
+            $selectedOrder = request('orden', 'fecha_desc');
+            $currentCategory = request('category_id');
+        @endphp
+
+        <!-- CHIPS DE TIPOS DE DOCUMENTO -->
+        <div class="mb-3">
+            @if(isset($tipos) && $tipos->count() > 0)
+                @foreach($tipos as $tipo)
+                    <form method="GET" action="{{ route('home') }}" class="d-inline">
+                        @foreach(request()->except(['tipo', 'page']) as $key => $value)
+                            @if(is_array($value))
+                                @foreach($value as $v)
+                                    <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <input type="hidden" name="tipo" value="{{ $tipo }}">
+                        <button type="submit" class="chip {{ $selectedTipo == $tipo ? 'active' : '' }}">
+                            {{ ucfirst($tipo) }} ({{ $stats['por_tipo'][$tipo] ?? 0 }})
+                        </button>
+                    </form>
+                @endforeach
+            @endif
+            <form method="GET" action="{{ route('home') }}" class="d-inline">
+                @foreach(request()->except(['tipo', 'page']) as $key => $value)
+                    @if(is_array($value))
+                        @foreach($value as $v)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                        @endforeach
+                    @else
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <button type="submit" class="chip {{ !$selectedTipo ? 'active' : '' }}">Todos los tipos</button>
+            </form>
         </div>
 
-        <!-- Contenido de Pestaña 3: Relatoría de actos administrativos -->
-        <div id="relatoria-actos-content" class="tab-content bg-white" style="display: block;">
-            <!-- Formulario para filtrar documentos -->
-            <form method="GET" action="{{ route('home') }}" class="bg-white text-[#93C01F] p-4 rounded mb-4">
-                <h2 class="h5 mb-4 d-flex align-items-center">
-                    <i class="fas fa-filter me-2" style="color: #93C01F;"></i>
-                    Filtrar Documentos
-                </h2>
+        <!-- CHIPS DE CATEGORÍAS -->
+        <div class="mb-4">
+            @if(isset($categories) && $categories->count() > 0)
+                @foreach($categories as $categoria)
+                    @php
+                        $countCategoria = $stats['por_categoria']->firstWhere('id', $categoria->id)?->documents_count ?? 0;
+                    @endphp
+                    <form method="GET" action="{{ route('home') }}" class="d-inline">
+                        @foreach(request()->except(['category_id', 'page']) as $key => $value)
+                            @if(is_array($value))
+                                @foreach($value as $v)
+                                    <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <input type="hidden" name="category_id" value="{{ $categoria->id }}">
+                        <button type="submit" class="chip {{ $currentCategory == $categoria->id ? 'active' : '' }}">
+                            {{ $categoria->nombre }} ({{ $countCategoria }})
+                        </button>
+                    </form>
+                @endforeach
+            @endif
+        </div>
 
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white text-muted border-end-0">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" id="nombre" name="nombre" class="form-control border-start-0" placeholder="Buscar por nombre" value="{{ request('nombre') }}">
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label for="numero" class="form-label">Número</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white text-muted border-end-0">
-                                <i class="fas fa-hashtag"></i>
-                            </span>
-                            <input type="text" id="numero" name="numero" class="form-control border-start-0" placeholder="Buscar por número" value="{{ request('numero') }}">
-                        </div>
-                    </div>
+        <!-- BUSCADOR GENERAL -->
+        <form method="GET" action="{{ route('home') }}">
+            <!-- Preservar otros filtros cuando se usa búsqueda general -->
+            @foreach(request()->except(['busqueda_general', 'page']) as $key => $value)
+                @if(is_array($value))
+                    @foreach($value as $v)
+                        <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                    @endforeach
+                @else
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endif
+            @endforeach
+            
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-light text-secondary"><i class="fas fa-search"></i></span>
+                <input type="search" name="busqueda_general" class="form-control"
+                       placeholder="Buscar por nombre, número, descripción o tipo..." value="{{ request('busqueda_general') }}">
+                <button class="btn btn-success" type="submit">Buscar</button>
+            </div>
 
-                    <div class="col-md-3">
-                        <label for="fecha" class="form-label">Fecha</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white text-muted border-end-0">
-                                <i class="fas fa-calendar-alt"></i>
-                            </span>
-                            <input type="date" id="fecha" name="fecha" class="form-control border-start-0" value="{{ request('fecha') }}">
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label for="tipo" class="form-label">Tipo</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white text-muted border-end-0">
-                                <i class="fas fa-file-alt"></i>
-                            </span>
-                            <select id="tipo" name="tipo" class="form-select border-start-0">
-                                <option value="" {{ request('tipo') == '' ? 'selected' : '' }}>Todos los tipos</option>
-                                <option value="decreto" {{ request('tipo') == 'decreto' ? 'selected' : '' }}>Decreto</option>
-                                <option value="resolución" {{ request('tipo') == 'resolución' ? 'selected' : '' }}>Resolución</option>
-                            </select>
-                        </div>
-                    </div>
+            <!-- ORDEN Y TOGGLE AVANZADO -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-sort text-muted"></i>
+                    <label class="fw-bold text-muted mb-0">Ordenar:</label>
+                    @foreach([
+                        'fecha_desc' => 'Recientes',
+                        'fecha_asc' => 'Antiguos',
+                        'nombre_asc' => 'A-Z',
+                    ] as $key => $label)
+                        <label class="order-option {{ $selectedOrder == $key ? 'active' : '' }}">
+                            <input type="radio" name="orden" value="{{ $key }}" onchange="this.form.submit()" hidden
+                                   {{ $selectedOrder == $key ? 'checked' : '' }}>
+                            {{ $label }}
+                        </label>
+                    @endforeach
                 </div>
-
-                <div class="mt-4 d-flex flex-wrap gap-3">
-                    <button type="submit" class="btn d-flex align-items-center gap-2" style="background-color: #43883d; color: white;">
-                        <i class="fas fa-search"></i>
-                        Buscar
-                    </button>
-                    <a href="{{ route('home') }}" class="btn btn-outline-light d-flex align-items-center gap-2">
-                        <i class="fas fa-undo"></i>
-                        Limpiar filtros
+                <div>
+                    <a class="toggle-advanced text-decoration-none" data-bs-toggle="collapse" href="#filtrosAvanzados" role="button">
+                        <i class="fas fa-sliders-h me-1"></i> Filtros avanzados
                     </a>
                 </div>
-            </form>
+            </div>
 
-            <!-- Listado de documentos -->
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            <!-- FILTROS AVANZADOS -->
+            <div class="collapse mb-4" id="filtrosAvanzados">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="category_id" class="form-label"><i class="fas fa-folder-open me-1"></i> Categoría</label>
+                        <select class="form-select" name="category_id" id="category_id">
+                            <option value="">Todas las categorías</option>
+                            @if(isset($categories))
+                                @foreach($categories as $categoria)
+                                    <option value="{{ $categoria->id }}" @selected(request('category_id') == $categoria->id)>
+                                        {{ $categoria->nombre }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tipo" class="form-label"><i class="fas fa-file-alt me-1"></i> Tipo de Documento</label>
+                        <select class="form-select" name="tipo" id="tipo">
+                            <option value="">Todos los tipos</option>
+                            @if(isset($tipos))
+                                @foreach($tipos as $tipo)
+                                    <option value="{{ $tipo }}" @selected(request('tipo') == $tipo)>
+                                        {{ ucfirst($tipo) }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label"><i class="fas fa-file-signature me-1"></i> Nombre o Tipo</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control" 
+                               placeholder="Buscar por nombre del documento o tipo (decreto, resolución)" value="{{ request('nombre') }}">
+                        <small class="text-muted">Busca en nombre del documento y tipo</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="numero" class="form-label"><i class="fas fa-hashtag me-1"></i> Número</label>
+                        <input type="text" name="numero" id="numero" class="form-control" 
+                               placeholder="Buscar por número del documento" value="{{ request('numero') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="año" class="form-label"><i class="fas fa-calendar me-1"></i> Año</label>
+                        <select class="form-select" name="año" id="año">
+                            <option value="">Todos los años</option>
+                            @if(isset($años))
+                                @foreach($años as $a)
+                                    <option value="{{ $a }}" @selected(request('año') == $a)>{{ $a }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mes" class="form-label"><i class="fas fa-calendar-week me-1"></i> Mes</label>
+                        <select class="form-select" name="mes" id="mes">
+                            <option value="">Todos los meses</option>
+                            @for($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" @selected(request('mes') == $i)>
+                                    {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                                </option>
+                            @endfor
+                        </select>
+                        <small class="text-muted">Requiere seleccionar un año</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-calendar-day me-1"></i> Fecha desde</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ request('fecha_desde') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-calendar-day me-1"></i> Fecha hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ request('fecha_hasta') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-calendar-check me-1"></i> Fecha exacta</label>
+                        <input type="date" name="fecha" class="form-control" value="{{ request('fecha') }}">
+                        <small class="text-muted">Solo si no usa rango de fechas</small>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="w-100">
+                            <button class="btn btn-outline-secondary me-2" type="button" onclick="window.location.href='{{ route('home') }}'">
+                                <i class="fas fa-times me-1"></i> Limpiar filtros
+                            </button>
+                            <button class="btn btn-success" type="submit">
+                                <i class="fas fa-filter me-1"></i> Aplicar filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if (
+            request()->filled('busqueda_general') ||
+            request()->filled('category_id') ||
+            request()->filled('tipo') ||
+            request()->filled('nombre') ||
+            request()->filled('numero') ||
+            request()->filled('año') ||
+            request()->filled('mes') ||
+            request()->filled('fecha') ||
+            request()->filled('fecha_desde') ||
+            request()->filled('fecha_hasta') ||
+            request()->filled('orden')
+        )
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="fw-bold text-success mb-2">Filtros aplicados:</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @php
+                        $baseParams = request()->except([
+                            '_token', 'page'
+                        ]);
+                    @endphp
+
+                    @if(request()->filled('busqueda_general'))
+                        <a href="{{ route('home', array_merge($baseParams, ['busqueda_general' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #43883D;">
+                            🔍 {{ request('busqueda_general') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('category_id'))
+                        <a href="{{ route('home', array_merge($baseParams, ['category_id' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #4E7525;">
+                            Categoría: {{ $categories->firstWhere('id', request('category_id'))?->nombre }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('tipo'))
+                        <a href="{{ route('home', array_merge($baseParams, ['tipo' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #6A9739;">
+                            Tipo: {{ ucfirst(request('tipo')) }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('nombre'))
+                        <a href="{{ route('home', array_merge($baseParams, ['nombre' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #7A7A52;">
+                            Nombre: {{ request('nombre') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('numero'))
+                        <a href="{{ route('home', array_merge($baseParams, ['numero' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #8B8B52;">
+                            Número: {{ request('numero') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('año'))
+                        <a href="{{ route('home', array_merge($baseParams, ['año' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #B2B700;">
+                            Año: {{ request('año') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('mes'))
+                        <a href="{{ route('home', array_merge($baseParams, ['mes' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #CCCC00;">
+                            Mes: {{ \Carbon\Carbon::create()->month(request('mes'))->translatedFormat('F') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('fecha'))
+                        <a href="{{ route('home', array_merge($baseParams, ['fecha' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #878D47;">
+                            Fecha: {{ request('fecha') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('fecha_desde'))
+                        <a href="{{ route('home', array_merge($baseParams, ['fecha_desde' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #878D47;">
+                            Desde: {{ request('fecha_desde') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('fecha_hasta'))
+                        <a href="{{ route('home', array_merge($baseParams, ['fecha_hasta' => null])) }}"
+                           class="badge text-white"
+                           style="background-color: #878D47;">
+                            Hasta: {{ request('fecha_hasta') }} &times;
+                        </a>
+                    @endif
+
+                    @if(request()->filled('orden'))
+                        <a href="{{ route('home', array_merge($baseParams, ['orden' => null])) }}"
+                           class="badge text-dark bg-light border border-secondary">
+                            Orden: {{
+                                match(request('orden')) {
+                                    'fecha_desc' => 'Más reciente',
+                                    'fecha_asc' => 'Más antiguo',
+                                    'nombre_asc' => 'Nombre A-Z',
+                                    'numero_asc' => 'Por número',
+                                    'tipo_asc' => 'Por tipo',
+                                    'categoria_asc' => 'Por categoría',
+                                    default => request('orden')
+                                }
+                            }} &times;
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
+
+        <!-- Listado de documentos -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            @if($documents->count() > 0)
                 @foreach($documents as $document)
                     @php
                     $extension = strtolower(pathinfo($document->archivo, PATHINFO_EXTENSION));
@@ -313,7 +693,6 @@
                                     <h3 class="h6 mb-2">
                                         <a href="{{ asset('storage/' . $document->archivo) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold" style="color: #43883d;">
                                             {{ ucfirst($document->tipo) }}: No {{ $document->numero }} de {{ $document->nombre }}
-                                            
                                         </a>
                                     </h3>
                                     <p class="text-muted small mb-2">{{ Str::limit($document->descripcion, 110) }}</p>
@@ -332,133 +711,166 @@
                                             {{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
                                         </div>
                                     </div>
-                                    <a href="{{ route('document.show', $document->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background-color: #43883d; color: white;" aria-label="Ver más o descargar {{ $document->nombre }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                                        </svg>
-                                        Ver más / Descargar
-                                    </a>
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                                        <a href="{{ route('document.show', $document->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background-color: #43883d; color: white;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            Ver / Descargar
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </article>
+                    
                 @endforeach
-            </div>
-        </div>
-
-        <!-- Contenido de Pestaña 4: Relatoría de circulares -->
-        <div id="relatoria-circulares-content" class="tab-content bg-white p-4 rounded shadow-sm" style="display: none;">
-            <div class="text-center py-5">
-                <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
-                    <i class="fas fa-file-alt"></i>
+                
+            @else
+                <div class="col-12 text-center py-5">
+                    <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <h3>No hay documentos disponibles</h3>
+                    <p class="text-muted mt-3">
+                        @if(request()->hasAny(['busqueda_general', 'category_id', 'tipo', 'nombre', 'numero', 'año', 'mes', 'fecha', 'fecha_desde', 'fecha_hasta']))
+                            No se encontraron documentos que coincidan con los filtros aplicados. 
+                            <a href="{{ route('home') }}" class="text-decoration-none" style="color: #43883d;">Limpiar filtros</a>
+                        @else
+                            Utilice los filtros para buscar documentos o intente más tarde.
+                        @endif
+                    </p>
                 </div>
-                <h3>Información Próximamente</h3>
-                <p class="text-muted mt-3">Estamos trabajando para brindarle acceso a las circulares de la entidad. <br>Por favor, vuelva a consultar más tarde.</p>
+            @endif
+        </div>
+
+        <!-- SECCIÓN DE PAGINACIÓN MEJORADA -->
+        @if($documents->hasPages())
+            <div class="pagination-container">
+                <!-- Enlaces de paginación -->
+                <div class="d-flex justify-content-center">
+                    {{ $documents->appends(request()->query())->links('pagination::bootstrap-4') }}
+                </div>
+            </div>
+        @endif
+        
+    </div>
+
+    {{-- FIN SECCIÓN PRINCIPAL --}}
+
+    {{-- FOOTER --}}
+    <span id="final"></span>
+    <div class="govco-footer mt-5">
+        <div class="row govco-portales-contenedor m-0">
+            <div class="col-4 govco-footer-logo-portal">
+                <div class="govco-logo-container-portal">
+                    <span class="govco-logo"></span>
+                    <span class="govco-separator"></span>
+                    <span class="govco-co"></span>
+                </div>
+            </div>
+            <div class="col-4 govco-info-datos-portal">
+                <div class="govco-separator-rows"></div>
+                <div class="govco-texto-datos-portal">
+                    <p class="govco-text-header-portal-1">
+                        Nombre completo del portal
+                    </p>
+                    <p>Dirección: xxxxxx xxx xxx Departamento y municipio. <br>
+                        Código Postal: xxxx <br>
+                        Horario de atención: Lunes a viernes xx:xx a.m. - xx:xx p.m.</p>
+                </div>
+                <div class="govco-network extramt-network">
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-twitter-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-instagram-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                    <div class="govco-iconContainer">
+                        <span class="icon-portal govco-facebook-square"></span>
+                        <span class="govco-link-portal">@Entidad</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4 govco-info-telefonos">
+                <div class="govco-separator-rows"></div>
+                <div class="govco-texto-telefonos">
+                    <p class="govco-text-header-portal-1">
+                        <span class="govco-phone-alt"></span>
+                        Contacto
+                    </p>
+                    <p>Teléfono conmutador: <br>
+                        +57(xx) xxx xx xx <br>
+                        Línea gratuita: 01-800-xxxxxxxx <br>
+                        Línea anticorrupción: 01-800-xxxxxxxx <br>
+                        Correo institucional: <br>
+                        entidad@entidad.gov.co</p>
+                </div>
+
+                <div class="govco-links-portal-container">
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Políticas</a>
+                        <a class="govco-link-portal" href="#">Mapa del sitio</a>
+                    </div>
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Términos y condiciones</a> <br>
+                    </div>
+                    <div class="col-12 m-0 mt-2">
+                        <a class="govco-link-portal" href="#">Accesibilidad</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    {{-- FIN SECCIÓN MEJORADA --}}
 
- {{-- fOOTER   --}}
-  <span id="final"></span>
-  <div class="govco-footer mt-5">
-    <div class="row govco-portales-contenedor m-0">
-      <div class="col-4 govco-footer-logo-portal">
-        <div class="govco-logo-container-portal">
-          <span class="govco-logo"></span>
-          <span class="govco-separator"></span>
-          <span class="govco-co"></span>
-        </div>
-      </div>
-      <div class="col-4 govco-info-datos-portal">
-        <div class="govco-separator-rows"></div>
-        <div class="govco-texto-datos-portal">
-          <p class="govco-text-header-portal-1">
-            Nombre completo del portal
-          </p>
-          <p>Dirección: xxxxxx xxx xxx Departamento y municipio. <br>
-            Código Postal: xxxx <br>
-            Horario de atención: Lunes a viernes xx:xx a.m. - xx:xx p.m.</p>
-        </div>
-        <div class="govco-network extramt-network">
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-twitter-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-instagram-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-          <div class="govco-iconContainer">
-            <span class="icon-portal govco-facebook-square"></span>
-            <span class="govco-link-portal">@Entidad</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-4 govco-info-telefonos">
-        <div class="govco-separator-rows"></div>
-        <div class="govco-texto-telefonos">
-          <p class="govco-text-header-portal-1">
-            <span class="govco-phone-alt"></span>
-            Contacto
-          </p>
-          <p>Teléfono conmutador: <br>
-            +57(xx) xxx xx xx <br>
-            Línea gratuita: 01-800-xxxxxxxx <br>
-            Línea anticorrupción: 01-800-xxxxxxxx <br>
-            Correo institucional: <br>
-            entidad@entidad.gov.co</p>
-        </div>
-
-        <div class="govco-links-portal-container">
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Políticas</a>
-            <a class="govco-link-portal" href="#">Mapa del sitio</a>
-          </div>
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Términos y condiciones</a> <br>
-          </div>
-          <div class="col-12 m-0 mt-2">
-            <a class="govco-link-portal" href="#">Accesibilidad</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tabs = document.querySelectorAll('.sistema-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', e => {
-      e.preventDefault(); // evitar navegación por link o href
-
-      const tabId = tab.getAttribute('data-tab');
-
-      tabs.forEach(t => {
-        t.classList.remove('active');
-        t.style.backgroundColor = '#43883d';
-        t.style.border = 'none';
-      });
-
-      tabContents.forEach(c => {
-        c.style.display = 'none';
-      });
-
-      tab.classList.add('active');
-      tab.style.backgroundColor = '#3F8827';
-      tab.style.border = '2px solid #93C01F';
-
-      document.getElementById(`${tabId}-content`).style.display = 'block';
-    });
-  });
-});
-
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mejorar la experiencia con el filtro de mes
+            const añoSelect = document.getElementById('año');
+            const mesSelect = document.getElementById('mes');
+            
+            // Función para validar la selección de mes
+            function validarMes() {
+                if (mesSelect.value && !añoSelect.value) {
+                    alert('Para filtrar por mes, primero debe seleccionar un año.');
+                    mesSelect.value = '';
+                }
+            }
+            
+            // Agregar event listener al select de mes
+            if (mesSelect) {
+                mesSelect.addEventListener('change', validarMes);
+            }
+            
+            // Agregar indicador visual cuando se selecciona año
+            if (añoSelect) {
+                añoSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        mesSelect.style.border = '2px solid #43883d';
+                        mesSelect.removeAttribute('disabled');
+                    } else {
+                        mesSelect.style.border = '';
+                        mesSelect.value = '';
+                    }
+                });
+            }
+            
+            // Preservar estado de filtros en chips
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(chip => {
+                chip.addEventListener('click', function(e) {
+                    // Pequeña animación visual
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
