@@ -169,6 +169,9 @@
                     'fecha_desc' => 'Más recientes',
                     'fecha_asc' => 'Más antiguos',
                     'nombre_asc' => 'Nombre A-Z',
+                    'numero_asc' => 'Por número',
+                    'tipo_asc' => 'Por tipo',
+                    'categoria_asc' => 'Por categoría'
                 ] as $key => $label)
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" name="orden" value="{{ $key }}" onchange="this.form.submit()" 
@@ -484,11 +487,130 @@
     @endforelse
 </div>
 
-<!-- Paginación -->
+<!-- Paginación mejorada -->
 @if($documents->hasPages())
-    <div class="mt-8 flex justify-center">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-            {{ $documents->appends(request()->query())->links() }}
+    <div class="mt-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <!-- Información de paginación -->
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                <div class="mb-4 sm:mb-0">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Mostrando 
+                        <span class="font-semibold text-[#43883d] dark:text-[#93C01F]">{{ $documents->firstItem() }}</span>
+                        a 
+                        <span class="font-semibold text-[#43883d] dark:text-[#93C01F]">{{ $documents->lastItem() }}</span>
+                        de 
+                        <span class="font-semibold text-[#43883d] dark:text-[#93C01F]">{{ $documents->total() }}</span>
+                        documentos
+                    </p>
+                </div>
+                
+                <!-- Selector de elementos por página -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm text-gray-700 dark:text-gray-300">Mostrar:</label>
+                    <form method="GET" action="{{ route('dashboard') }}" id="perPageForm">
+                        @foreach(request()->except(['page', 'per_page']) as $key => $value)
+                            @if(is_array($value))
+                                @foreach($value as $v)
+                                    <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        
+                        <select name="per_page" onchange="document.getElementById('perPageForm').submit()" 
+                                class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-[#43883d] focus:border-[#43883d]">
+                            <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                    </form>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">por página</span>
+                </div>
+            </div>
+
+            <!-- Enlaces de paginación -->
+            <div class="flex justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {{-- Botón anterior --}}
+                    @if ($documents->onFirstPage())
+                        <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Anterior</span>
+                        </span>
+                    @else
+                        <a href="{{ $documents->appends(request()->query())->previousPageUrl() }}" 
+                           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-[#43883d] hover:text-white hover:border-[#43883d] transition-colors">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Anterior</span>
+                        </a>
+                    @endif
+
+                    {{-- Números de página --}}
+                    @foreach ($documents->appends(request()->query())->getUrlRange(1, $documents->lastPage()) as $page => $url)
+                        @if ($page == $documents->currentPage())
+                            <span class="relative inline-flex items-center px-4 py-2 border border-[#43883d] bg-[#43883d] text-sm font-medium text-white">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $url }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-[#43883d] hover:text-white hover:border-[#43883d] transition-colors">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endforeach
+
+                    {{-- Botón siguiente --}}
+                    @if ($documents->hasMorePages())
+                        <a href="{{ $documents->appends(request()->query())->nextPageUrl() }}" 
+                           class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-[#43883d] hover:text-white hover:border-[#43883d] transition-colors">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Siguiente</span>
+                        </a>
+                    @else
+                        <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Siguiente</span>
+                        </a>
+                    @endif
+                </nav>
+            </div>
+
+            <!-- Información adicional de navegación rápida -->
+            @if($documents->lastPage() > 1)
+                <div class="mt-4 flex justify-center">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span>Ir a página:</span>
+                        <form method="GET" action="{{ route('dashboard') }}" class="inline-flex">
+                            @foreach(request()->except(['page']) as $key => $value)
+                                @if(is_array($value))
+                                    @foreach($value as $v)
+                                        <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
+                            @endforeach
+                            
+                            <input type="number" name="page" min="1" max="{{ $documents->lastPage() }}" 
+                                   value="{{ $documents->currentPage() }}"
+                                   class="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                   onchange="this.form.submit()">
+                            <span class="ml-1">de {{ $documents->lastPage() }}</span>
+                        </form>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 @endif
