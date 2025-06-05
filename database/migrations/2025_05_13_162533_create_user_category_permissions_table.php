@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('can_create')->default(false);  
             $table->boolean('can_edit')->default(false);  
             $table->boolean('can_delete')->default(false);  
-            $table->timestamps();  
+            $table->timestamps();   
               
             // Índice compuesto para búsquedas eficientes  
             $table->unique(['user_id', 'category_id']);  

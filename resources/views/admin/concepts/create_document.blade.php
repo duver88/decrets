@@ -86,8 +86,8 @@
                         focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#51AD32] dark:focus:border-[#51AD32]
                         dark:bg-gray-700 dark:text-white font-ubuntu" required>
                         <option value="">-- Selecciona el tipo de documento --</option>
-                        <option value="Decreto" {{ old('tipo_documento') == 'Decreto' ? 'selected' : '' }}>Decreto</option>
-                        <option value="Resolución" {{ old('tipo_documento') == 'Resolución' ? 'selected' : '' }}>Resolución</option>
+                        <option value="Concepto" {{ old('tipo_documento') }}>Concepto</option>
+
                     </select>
                     @error('tipo_documento')
                         <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>

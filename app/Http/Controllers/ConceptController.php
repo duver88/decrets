@@ -212,7 +212,7 @@ public function create(Request $request)
             'contenido' => 'nullable|string',
             'concept_type_id' => 'required|exists:concept_types,id',
             'concept_theme_id' => 'required|exists:concept_themes,id',
-            'tipo_documento' => 'required|in:Decreto,Resolución',
+            'tipo_documento' => 'required|in:Concepto',
             'año' => 'required|string|max:4',
             'fecha' => 'required|date',
             'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
