@@ -172,6 +172,8 @@
             margin-left: 5px;
         }
 
+        
+
         /* Responsive para móviles */
         @media (max-width: 576px) {
             .pagination-container {
@@ -354,24 +356,7 @@
         @php
             $selectedType = request('concept_type_id');
             $selectedOrder = request('orden', 'fecha_desc');
-            $currentTipoDocumento = request('tipo_documento');
         @endphp
-
-        <!-- CHIPS DE TIPOS DE DOCUMENTO -->
-        <div class="mb-3">
-            @foreach($tiposDocumento as $tipo)
-                <form method="GET" action="{{ route('concepts.public') }}" class="d-inline">
-                    <input type="hidden" name="tipo_documento" value="{{ $tipo }}">
-                    <button type="submit" class="chip {{ $currentTipoDocumento == $tipo ? 'active' : '' }}">
-                        {{ $tipo }} ({{ $stats['por_tipo_documento'][$tipo] ?? 0 }})
-                    </button>
-                </form>
-            @endforeach
-            <form method="GET" action="{{ route('concepts.public') }}" class="d-inline">
-                <input type="hidden" name="tipo_documento" value="">
-                <button type="submit" class="chip {{ !$currentTipoDocumento ? 'active' : '' }}">Todos</button>
-            </form>
-        </div>
 
         <!-- CHIPS DE TIPOS DE CONCEPTO -->
         <div class="mb-4">
@@ -444,17 +429,19 @@
                             @endforeach
                         </select>
                     </div>
+                    @if(isset($dependencias) && count($dependencias) > 0)
                     <div class="col-md-6">
-                        <label for="tipo_documento" class="form-label"><i class="fas fa-file-alt me-1"></i> Tipo de Documento</label>
-                        <select class="form-select" name="tipo_documento" id="tipo_documento">
-                            <option value="">Todos</option>
-                            @foreach($tiposDocumento as $tipo)
-                                <option value="{{ $tipo }}" @selected(request('tipo_documento') == $tipo)>
-                                    {{ $tipo }}
+                        <label for="dependencia" class="form-label"><i class="fas fa-building me-1"></i> Dependencia</label>
+                        <select class="form-select" name="dependencia" id="dependencia">
+                            <option value="">Todas</option>
+                            @foreach($dependencias as $dep)
+                                <option value="{{ $dep }}" @selected(request('dependencia') == $dep)>
+                                    {{ $dep }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
+                    @endif
                     <div class="col-md-6">
                         <label for="año" class="form-label"><i class="fas fa-calendar me-1"></i> Año</label>
                         <select class="form-select" name="año">
@@ -488,7 +475,7 @@
             request()->filled('busqueda_general') ||
             request()->filled('concept_type_id') ||
             request()->filled('concept_theme_id') ||
-            request()->filled('tipo_documento') ||
+            request()->filled('dependencia') ||
             request()->filled('año') ||
             request()->filled('mes') ||
             request()->filled('fecha_desde') ||
@@ -524,15 +511,15 @@
                         <a href="{{ route('concepts.public', array_merge($baseParams, ['concept_theme_id' => null])) }}"
                            class="badge text-white"
                            style="background-color: #6A9739;">
-                            Tema: {{ $temasFiltered->firstWhere('id', request('concept_theme_id'))?->nombre }} &times;
+                            Tema: {{ $conceptThemes->firstWhere('id', request('concept_theme_id'))?->nombre }} &times;
                         </a>
                     @endif
 
-                    @if(request()->filled('tipo_documento'))
-                        <a href="{{ route('concepts.public', array_merge($baseParams, ['tipo_documento' => null])) }}"
+                    @if(request()->filled('dependencia'))
+                        <a href="{{ route('concepts.public', array_merge($baseParams, ['dependencia' => null])) }}"
                            class="badge text-white"
                            style="background-color: #7A7A52;">
-                            Documento: {{ request('tipo_documento') }} &times;
+                            Dependencia: {{ request('dependencia') }} &times;
                         </a>
                     @endif
 
@@ -587,101 +574,128 @@
         @endif
 
         <!-- Listado de conceptos -->
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-            @if($concepts->count() > 0)
-                @foreach($concepts as $concept)
-                    @php
-                    $extension = strtolower(pathinfo($concept->archivo, PATHINFO_EXTENSION));
-                    $iconClass = '';
-                    $icon = '';
-            
-                    if ($extension == 'pdf') {
-                        $iconClass = 'text-danger';
-                        $icon = '<i class="fas fa-file-pdf fa-2x"></i>';
-                    } elseif (in_array($extension, ['doc', 'docx'])) {
-                        $iconClass = 'text-primary';
-                        $icon = '<i class="fas fa-file-word fa-2x"></i>';
-                    } elseif (in_array($extension, ['xls', 'xlsx'])) {
-                        $iconClass = 'text-success';
-                        $icon = '<i class="fas fa-file-excel fa-2x"></i>';
-                    } else {
-                        $iconClass = 'text-secondary';
-                        $icon = '<i class="fas fa-file-alt fa-2x"></i>';
-                    }
-                    @endphp
-            
-                    <article class="col">
-                        <div class="card h-100 shadow rounded overflow-hidden transition-all hover:shadow-lg" 
-                             style="transition: all 0.3s ease; background-color: #f9f9f9;">
-                            <div class="d-flex align-items-center p-3 gap-3">
-                                <div class="flex-shrink-0 text-center" style="width: 70px;">
-                                    <div class="{{ $iconClass }}">
-                                        {!! $icon !!}
-                                    </div>
-                                    <span class="visually-hidden">{{ strtoupper($extension) }} archivo</span>
-                                </div>
-            
-                                <div class="flex-grow-1">
-                                    <h3 class="h6 mb-2">
-                                        <a href="{{ asset('storage/' . $concept->archivo) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold" style="color: #43883d;">
-                                           {{ $concept->tipo_documento }}: No {{ $concept->titulo }} del {{ $concept->año }}
-                                        </a>
-                                    </h3>
-                                    <p class="text-muted small mb-2">{{ Str::limit($concept->contenido, 110) }}</p>
-                                    <div class="d-flex align-items-center gap-3 mb-3 text-muted small">
-                                        <div class="d-flex align-items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                                            </svg>
-                                            {{ $concept->created_at->diffForHumans() }}
-                                        </div>
-                                        <div class="d-flex align-items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                                            </svg>
-                                            {{ \Carbon\Carbon::parse($concept->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
-                                        </div>
-                                    </div>
-                                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                                            <a href="{{ route('concepts.show.public', $concept->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background-color: #43883d; color: white;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                                Ver / Descargar
-                                            </a>
-                                           
-                                        </div>
-                                </div>
+<div class="row g-3">
+    @if($concepts->count() > 0)
+        @foreach($concepts as $concept)
+            @php
+            $extension = strtolower(pathinfo($concept->archivo, PATHINFO_EXTENSION));
+            $iconClass = '';
+            $bgClass = '';
+            $icon = '';
+    
+            if ($extension == 'pdf') {
+                $iconClass = 'text-danger';
+                $bgClass = 'bg-danger bg-opacity-10';
+                $icon = '<i class="fas fa-file-pdf fa-2x"></i>';
+            } elseif (in_array($extension, ['doc', 'docx'])) {
+                $iconClass = 'text-primary';
+                $bgClass = 'bg-primary bg-opacity-10';
+                $icon = '<i class="fas fa-file-word fa-2x"></i>';
+            } elseif (in_array($extension, ['xls', 'xlsx'])) {
+                $iconClass = 'text-success';
+                $bgClass = 'bg-success bg-opacity-10';
+                $icon = '<i class="fas fa-file-excel fa-2x"></i>';
+            } else {
+                $iconClass = 'text-secondary';
+                $bgClass = 'bg-secondary bg-opacity-10';
+                $icon = '<i class="fas fa-file-alt fa-2x"></i>';
+            }
+            @endphp
+    
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card border rounded shadow-sm h-100 bg-white">
+                    <div class="card-body p-4">
+                        
+                        <!-- Badges en la parte superior -->
+                        <div class="mb-3">
+                            <span class="badge bg-success text-white me-2">Concepto</span>
+                            <span class="badge bg-secondary text-white me-2">{{ $concept->año }}</span>
+                            
+                            @if($concept->conceptTheme)
+                                <span class="badge bg-primary text-white">
+                                    {{ Str::limit($concept->conceptTheme->nombre, 20) }}
+                                </span>
+                            @elseif($concept->dependencia)
+                                <span class="badge bg-primary text-white">
+                                    {{ Str::limit($concept->dependencia, 20) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <!-- Ícono + Título en línea horizontal -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3 {{ $iconClass }} {{ $bgClass }} p-2 rounded d-flex align-items-center justify-content-center" 
+                                 style="width: 60px; height: 60px; min-width: 60px;">
+                                {!! $icon !!}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1 fw-bold text-dark">
+                                    <a href="{{ route('concepts.show.public', $concept->id) }}" 
+                                       class="text-decoration-none text-dark">
+                                        Concepto No {{ $concept->titulo }} del {{ $concept->año }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-0 small">
+                                    {{ Str::limit($concept->contenido, 50) }}
+                                </p>
                             </div>
                         </div>
-                    </article>
-                    
-                @endforeach
-                
-            @else
-                <div class="col-12 text-center py-5">
-                    <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
-                        <i class="fas fa-book-open"></i>
+
+                        <!-- Información de fecha -->
+                        <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                            <span class="d-flex align-items-center">
+                                <i class="fas fa-calendar me-2 text-primary"></i>
+                                {{ \Carbon\Carbon::parse($concept->fecha)->format('d \d\e F \d\e\l Y') }}
+                            </span>
+                            <span class="d-flex align-items-center">
+                                <i class="fas fa-clock me-2 text-secondary"></i>
+                                {{ $concept->created_at->diffForHumans() }}
+                            </span>
+                        </div>
+
+                        <!-- Botón Ver idéntico a la imagen -->
+                        <div class="d-grid">
+                            <a href="{{ route('concepts.show.public', $concept->id) }}" 
+                               class="btn btn-success fw-bold">
+                                Ver
+                            </a>
+                        </div>
+
                     </div>
-                    <h3>No hay conceptos disponibles</h3>
-                    <p class="text-muted mt-3">
-                        @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
-                            No se encontraron conceptos que coincidan con los filtros aplicados. 
-                            <a href="{{ route('concepts.public') }}" class="text-decoration-none" style="color: #43883d;">Limpiar filtros</a>
+                </div>
+            </div>
+        @endforeach
+    @else
+        <!-- Estado vacío -->
+        <div class="col-12">
+            <div class="card border rounded shadow-sm bg-light">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+                    </div>
+                    <h4 class="text-success fw-bold mb-3">No hay conceptos disponibles</h4>
+                    <p class="text-muted mb-4">
+                        @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'dependencia', 'año', 'fecha_desde', 'fecha_hasta']))
+                            No se encontraron conceptos que coincidan con los filtros aplicados.
                         @else
-                            Utilice los filtros para buscar conceptos o intente más tarde.
+                            Utilice los filtros de búsqueda para encontrar conceptos específicos.
                         @endif
                     </p>
+                    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'dependencia', 'año', 'fecha_desde', 'fecha_hasta']))
+                        <a href="{{ route('concepts.public') }}" class="btn btn-outline-success">
+                            <i class="fas fa-refresh me-2"></i>
+                            Limpiar Filtros
+                        </a>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
+    @endif
+</div>
 
         <!-- SECCIÓN DE PAGINACIÓN MEJORADA -->
         @if($concepts->hasPages())
             <div class="pagination-container">
-
-
                 <!-- Enlaces de paginación -->
                 <div class="d-flex justify-content-center">
                     {{ $concepts->appends(request()->query())->links('pagination::bootstrap-4') }}

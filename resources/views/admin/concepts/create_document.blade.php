@@ -55,6 +55,8 @@
             @csrf
             <!-- Tipo de concepto (hidden) -->
             <input type="hidden" name="concept_type_id" value="{{ $selectedTypeId }}">
+            <!-- Campo oculto para tipo de documento fijo como "Concepto" -->
+            <input type="hidden" name="tipo_documento" value="Concepto">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Tema -->
@@ -78,18 +80,21 @@
                     @enderror
                 </div>
 
-                <!-- Tipo de Documento (Decreto o Resolución) -->
+                <!-- Dependencia -->
                 <div>
-                    <label for="tipo_documento" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Documento</label>
-                    <select name="tipo_documento" id="tipo_documento" 
+                    <label for="dependencia" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Dependencia</label>
+                    <select name="dependencia" id="dependencia" 
                         class="w-full border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-3
                         focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#51AD32] dark:focus:border-[#51AD32]
-                        dark:bg-gray-700 dark:text-white font-ubuntu" required>
-                        <option value="">-- Selecciona el tipo de documento --</option>
-                        <option value="Concepto" {{ old('tipo_documento') }}>Concepto</option>
-
+                        dark:bg-gray-700 dark:text-white font-ubuntu">
+                        <option value="">-- Selecciona una dependencia --</option>
+                        @foreach($dependencias as $dep)
+                            <option value="{{ $dep }}" {{ old('dependencia') == $dep ? 'selected' : '' }}>
+                                {{ $dep }}
+                            </option>
+                        @endforeach
                     </select>
-                    @error('tipo_documento')
+                    @error('dependencia')
                         <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>
                     @enderror
                 </div>

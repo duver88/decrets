@@ -14,11 +14,14 @@
         <div class="p-8 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div>
                 <h1 class="text-3xl font-ubuntu font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                   {{ $concept->tipo_documento ?? 'Documento' }}: <span class="text-[#43883d] dark:text-[#93C01F]">{{ $concept->titulo }}</span> del {{$concept->año}} 
+                   Concepto: <span class="text-[#43883d] dark:text-[#93C01F]">{{ $concept->titulo }}</span> del {{$concept->año}} 
                 </h1>
                 <p class="mt-2 text-gray-600 dark:text-gray-400 text-sm sm:text-base font-ubuntu">
                     Tema: <span class="font-semibold">{{ $concept->conceptTheme->nombre ?? 'Sin tema' }}</span> |
                     Año: <span class="font-semibold">{{ $concept->año }}</span>
+                    @if($concept->dependencia)
+                        | Dependencia: <span class="font-semibold">{{ $concept->dependencia }}</span>
+                    @endif
                 </p>
             </div>
 
@@ -41,7 +44,7 @@
         </div>
 
         <!-- Metadatos -->
-        <div class="px-8 py-6 bg-[#EAECB1]/10 dark:bg-gray-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-8 text-gray-700 dark:text-gray-300 text-sm sm:text-base font-ubuntu">
+        <div class="px-8 py-6 bg-[#EAECB1]/10 dark:bg-gray-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-y-6 gap-x-8 text-gray-700 dark:text-gray-300 text-sm sm:text-base font-ubuntu">
             <div class="flex items-center space-x-3">
                 <div class="bg-[#43883d]/10 dark:bg-[#43883d]/20 p-2 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#43883d] dark:text-[#93C01F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,6 +95,21 @@
                     <div class="font-medium uppercase">{{ $extension }}</div>
                 </div>
             </div>
+
+            <!-- Dependencia -->
+            @if($concept->dependencia)
+            <div class="flex items-center space-x-3">
+                <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Dependencia</div>
+                    <div class="font-medium">{{ $concept->dependencia }}</div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Contenido -->

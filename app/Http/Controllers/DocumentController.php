@@ -497,5 +497,17 @@ public function index(Request $request)
         return redirect()->route('user.dashboard')->with('success', 'Documento eliminado correctamente');  
     }  
     }
+
+
+    public function userDashboard()  
+{  
+    // Obtener documentos filtrados por permisos del usuario  
+    $user = auth()->user();  
+    $documents = Document::whereHas('category', function($query) use ($user) {  
+        $query->whereIn('id', $user->categoryPermissions()->pluck('category_id'));  
+    })->orderBy('fecha', 'desc')->get();  
+      
+    return view('users.dashboard', compact('documents'));  
+}
 }
 

@@ -169,6 +169,26 @@
                     </div>
                 </div>
 
+                <!-- Dependencia -->
+                <div>
+                    <label for="dependencia" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Dependencia</label>
+                    <select name="dependencia" id="dependencia" 
+                        class="w-full border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-3
+                        focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#51AD32] dark:focus:border-[#51AD32]
+                        dark:bg-gray-700 dark:text-white font-ubuntu">
+                        <option value="">-- Selecciona una dependencia --</option>
+                        @foreach($dependencias as $dependencia)
+                            <option value="{{ $dependencia }}" 
+                                {{ old('dependencia', $concept->dependencia ?? '') == $dependencia ? 'selected' : '' }}>
+                                {{ $dependencia }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('dependencia')
+                        <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Descripción -->
                 <div>
                     <label for="contenido" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>

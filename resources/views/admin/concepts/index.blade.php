@@ -43,39 +43,13 @@
     @endif
 
     <!-- SECCIÓN DE FILTROS Y BÚSQUEDA -->
-<!-- SECCIÓN DE FILTROS Y BÚSQUEDA -->
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700">
     @php
         $selectedType = request('concept_type_id');
         $selectedOrder = request('orden', 'fecha_desc');
-        $currentTipoDocumento = request('tipo_documento');
     @endphp
 
-    <!-- CHIPS DE TIPOS DE DOCUMENTO -->
-    <div class="mb-4">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tipo de Documento:</h4>
-        <div class="flex flex-wrap gap-2">
-            @foreach($tiposDocumento as $tipo)
-                <form method="GET" action="{{ route('concepts.index') }}" class="inline">
-                    @foreach(request()->except(['tipo_documento', 'page']) as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                    @endforeach
-                    <input type="hidden" name="tipo_documento" value="{{ $tipo }}">
-                    <button type="submit" class="px-3 py-1 text-sm rounded-full transition-colors border {{ $currentTipoDocumento == $tipo ? 'bg-[#43883d] text-white border-[#43883d]' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                        {{ $tipo }} ({{ $stats['por_tipo_documento'][$tipo] ?? 0 }})
-                    </button>
-                </form>
-            @endforeach
-            <form method="GET" action="{{ route('concepts.index') }}" class="inline">
-                @foreach(request()->except(['tipo_documento', 'page']) as $key => $value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endforeach
-                <button type="submit" class="px-3 py-1 text-sm rounded-full transition-colors border {{ !$currentTipoDocumento ? 'bg-[#43883d] text-white border-[#43883d]' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                    Todos
-                </button>
-            </form>
-        </div>
-    </div>
+
 
     <!-- CHIPS DE TIPOS DE CONCEPTO -->
     <div class="mb-6">
@@ -181,19 +155,21 @@
 
             <div id="advanced-filters" class="mt-4 space-y-4 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Tipo de Documento -->
+                    <!-- Dependencia -->
+                    @if(isset($dependencias) && count($dependencias) > 0)
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Documento:</label>
-                        <select name="tipo_documento" 
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dependencia:</label>
+                        <select name="dependencia" 
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#43883d] dark:focus:border-[#43883d]">
-                            <option value="">Todos</option>
-                            @foreach($tiposDocumento as $tipo)
-                                <option value="{{ $tipo }}" {{ request('tipo_documento') == $tipo ? 'selected' : '' }}>
-                                    {{ $tipo }}
+                            <option value="">Todas</option>
+                            @foreach($dependencias as $dep)
+                                <option value="{{ $dep }}" {{ request('dependencia') == $dep ? 'selected' : '' }}>
+                                    {{ $dep }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     <!-- Fecha desde -->
                     <div>
@@ -216,7 +192,7 @@
             </div>
         </div>
 
-        <!-- BOTONES DE ACCIÓN GLOBALES (Fuera de filtros avanzados) -->
+        <!-- BOTONES DE ACCIÓN GLOBALES -->
         <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
             <div class="flex gap-2 justify-end">
                 <a href="{{ route('concepts.index') }}" 
@@ -232,7 +208,7 @@
     </form>
 
     <!-- FILTROS APLICADOS -->
-    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta', 'orden']))
+    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'dependencia', 'año', 'fecha_desde', 'fecha_hasta', 'orden']))
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
             <h6 class="text-sm font-semibold text-[#43883d] mb-2">Filtros aplicados:</h6>
             <div class="flex flex-wrap gap-2">
@@ -264,10 +240,10 @@
                     </a>
                 @endif
 
-                @if(request()->filled('tipo_documento'))
-                    <a href="{{ route('concepts.index', array_merge($baseParams, ['tipo_documento' => null])) }}"
-                       class="inline-flex items-center px-3 py-1 bg-gray-600 dark:bg-gray-500 text-white text-xs rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition">
-                        Documento: {{ request('tipo_documento') }}
+                @if(request()->filled('dependencia'))
+                    <a href="{{ route('concepts.index', array_merge($baseParams, ['dependencia' => null])) }}"
+                       class="inline-flex items-center px-3 py-1 bg-purple-600 dark:bg-purple-500 text-white text-xs rounded-full hover:bg-purple-700 dark:hover:bg-purple-600 transition">
+                        Dependencia: {{ request('dependencia') }}
                         <span class="ml-1">×</span>
                     </a>
                 @endif
@@ -359,15 +335,20 @@
                     <div class="flex-grow">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-2 py-0.5 bg-[#EAECB1] text-[#285F19] text-xs font-ubuntu font-medium rounded-full">
-                                {{ $concept->tipo_documento ?? 'Documento' }}
+                                Concepto
                             </span>
                             <span class="px-2 py-0.5 bg-[#D8E5B0] text-[#285F19] text-xs font-ubuntu font-medium rounded-full">
                                 {{ $concept->año }}
                             </span>
+                            @if($concept->dependencia)
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-ubuntu font-medium rounded-full">
+                                    {{ Str::limit($concept->dependencia, 20) }}
+                                </span>
+                            @endif
                         </div>
                         <h3 class="text-lg font-ubuntu font-semibold text-gray-900 dark:text-gray-100 hover:text-[#43883d] transition">
                             <a href="{{ route('concepts.show', $concept->id) }}" class="block">
-                                {{ $concept->tipo_documento ?? 'Documento' }}: No {{ $concept->titulo }} del {{$concept->año}}
+                                Concepto No {{ $concept->titulo }} del {{ $concept->año }}
                             </a>
                         </h3>
                         <p class="text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 font-ubuntu text-sm">{{ $concept->contenido }}</p>
@@ -417,14 +398,14 @@
                     </svg>
                 </div>
                 <p class="text-gray-500 dark:text-gray-400 font-ubuntu mb-6">
-                    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
+                    @if(request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'dependencia', 'año', 'fecha_desde', 'fecha_hasta']))
                         No se encontraron conceptos que coincidan con los filtros aplicados.
                         <br><a href="{{ route('concepts.index') }}" class="text-[#43883d] hover:text-[#3F8827] underline">Limpiar filtros</a>
                     @else
                         No hay conceptos para mostrar.
                     @endif
                 </p>
-                @if(!request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'tipo_documento', 'año', 'fecha_desde', 'fecha_hasta']))
+                @if(!request()->hasAny(['busqueda_general', 'concept_type_id', 'concept_theme_id', 'dependencia', 'año', 'fecha_desde', 'fecha_hasta']))
                 <a href="{{ route('concepts.create') }}" class="inline-block px-6 py-3 bg-[#43883d] text-white rounded-md shadow hover:bg-[#3F8827] transition font-ubuntu">
                     Crear el primer concepto
                 </a>
@@ -436,8 +417,6 @@
     <!-- PAGINACIÓN MEJORADA -->
     @if($concepts->hasPages())
         <div class="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-8 shadow-lg">
-
-
             <!-- Enlaces de paginación con estilo personalizado -->
             <div class="flex justify-center">
                 <nav class="flex items-center gap-1" role="navigation" aria-label="Pagination Navigation">

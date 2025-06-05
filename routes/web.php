@@ -93,7 +93,7 @@ Route::middleware(['auth', IsAdmin::class])->group(function () {
   
 // Rutas para usuarios normales  
 Route::middleware(['auth'])->group(function () {  
-    Route::get('/users/dashboard', [DocumentController::class, 'index'])  
+    Route::get('/users/dashboard', [DocumentController::class, 'userDashboard'])  
          ->name('user.dashboard');  
     Route::get('/users/dashboard/documento/crear', [DocumentController::class, 'create'])  
          ->name('user.document.create');  

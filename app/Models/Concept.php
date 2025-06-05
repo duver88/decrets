@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Concept extends Model
 {
-      use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'titulo', 
@@ -17,14 +17,17 @@ class Concept extends Model
         'concept_theme_id', 
         'user_id',
         'tipo_documento',
+        'dependencia',  // Cambio de dependencias a dependencia
         'año',
         'fecha'
     ];
 
     protected $casts = [
         'fecha' => 'date'
+        // Removemos el cast de dependencias ya que ahora es un string simple
     ];
 
+    // Relaciones existentes
     public function conceptType()
     {
         return $this->belongsTo(ConceptType::class);
@@ -38,5 +41,11 @@ class Concept extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Método helper para obtener la dependencia como texto
+    public function getDependenciaTextAttribute()
+    {
+        return $this->dependencia ?? 'Sin dependencia asignada';
     }
 }
