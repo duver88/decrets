@@ -63,50 +63,28 @@
                 @method('PUT')
 
                 <input type="hidden" name="concept_type_id" value="{{ $selectedTypeId ?? old('concept_type_id', $concept->concept_type_id) }}">
+                <!-- Campo oculto para tipo de documento fijo como "Concepto" -->
+                <input type="hidden" name="tipo_documento" value="Concepto">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tema -->
-                    <div>
-                        <label for="concept_theme_id" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Tema</label>
-                        <select name="concept_theme_id" id="concept_theme_id" data-selected-theme="{{ old('concept_theme_id', $concept->concept_theme_id) }}" 
-                            class="w-full border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-3
-                            focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#51AD32] dark:focus:border-[#51AD32]
-                            dark:bg-gray-700 dark:text-white font-ubuntu" required>
-                            <option value="">-- Selecciona un tema --</option>
-                            @if(isset($themesForTypes[$selectedTypeId ?? old('concept_type_id', $concept->concept_type_id)]))
-                                @foreach($themesForTypes[$selectedTypeId ?? old('concept_type_id', $concept->concept_type_id)] as $theme)
-                                    <option value="{{ $theme->id }}" {{ old('concept_theme_id', $concept->concept_theme_id) == $theme->id ? 'selected' : '' }}>
-                                        {{ $theme->nombre }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                        @error('concept_theme_id')
-                            <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Tipo de Documento (Decreto o resolución) -->
-                    <div>
-                        <label class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Documento</label>
-                        <div class="flex items-center space-x-6 h-[46px] border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700">
-                            <div class="flex items-center">
-                                <input type="radio" id="decreto" name="tipo_documento" value="Decreto" 
-                                    class="h-4 w-4 text-[#43883d] dark:text-[#51AD32] focus:ring-[#43883d] dark:focus:ring-[#51AD32] border-gray-300 dark:border-gray-600" 
-                                    {{ old('tipo_documento', $concept->tipo_documento ?? 'Decreto') == 'Decreto' ? 'checked' : '' }} required>
-                                <label for="decreto" class="ml-2 block text-sm font-ubuntu text-gray-700 dark:text-gray-300">Decreto</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" id="resolucion" name="tipo_documento" value="Resolución" 
-                                    class="h-4 w-4 text-[#43883d] dark:text-[#51AD32] focus:ring-[#43883d] dark:focus:ring-[#51AD32] border-gray-300 dark:border-gray-600" 
-                                    {{ old('tipo_documento', $concept->tipo_documento ?? '') == 'Resolución' ? 'checked' : '' }}>
-                                <label for="resolucion" class="ml-2 block text-sm font-ubuntu text-gray-700 dark:text-gray-300">Resolución</label>
-                            </div>
-                        </div>
-                        @error('tipo_documento')
-                            <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Tema -->
+                <div>
+                    <label for="concept_theme_id" class="block font-ubuntu font-medium text-gray-700 dark:text-gray-300 mb-2">Tema</label>
+                    <select name="concept_theme_id" id="concept_theme_id" data-selected-theme="{{ old('concept_theme_id', $concept->concept_theme_id) }}" 
+                        class="w-full border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-3
+                        focus:ring-[#43883d] focus:border-[#43883d] dark:focus:ring-[#51AD32] dark:focus:border-[#51AD32]
+                        dark:bg-gray-700 dark:text-white font-ubuntu" required>
+                        <option value="">-- Selecciona un tema --</option>
+                        @if(isset($themesForTypes[$selectedTypeId ?? old('concept_type_id', $concept->concept_type_id)]))
+                            @foreach($themesForTypes[$selectedTypeId ?? old('concept_type_id', $concept->concept_type_id)] as $theme)
+                                <option value="{{ $theme->id }}" {{ old('concept_theme_id', $concept->concept_theme_id) == $theme->id ? 'selected' : '' }}>
+                                    {{ $theme->nombre }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('concept_theme_id')
+                        <p class="text-[#DD0A24] dark:text-red-400 text-sm mt-1 font-ubuntu">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

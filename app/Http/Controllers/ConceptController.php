@@ -300,7 +300,6 @@ public function edit(Request $request, $id)
             'contenido' => 'nullable|string',
             'concept_type_id' => 'required|exists:concept_types,id',
             'concept_theme_id' => 'required|exists:concept_themes,id',
-            'tipo_documento' => 'required|in:Decreto,Resolución',
             'año' => 'required|string|max:4',
             'fecha' => 'required|date',
             'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:2048',
