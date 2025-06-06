@@ -109,200 +109,189 @@
     </header>
     <br>
     {{-- Fin Header --}}
-    <div class="container-fluid">
-        <div class="concept-container">
-            <!-- Badge de seguridad -->
-            <div class="security-badge">
-                <i class="fas fa-gavel me-1"></i>
-                Concepto Jurídico
-            </div>
 
-            <!-- Header del concepto -->
-            <div class="concept-header">
-                <h1>{{ $concept->titulo }}</h1>
-                <p class="subtitle mb-0">{{ $concept->tipo_documento }} - {{ $concept->conceptType->nombre }}</p>
-            </div>
+<div class="concept-container">
+    <!-- Botón de regreso -->
+    <a href="{{ route('concepts.public') }}" class="back-btn">
+        <i class="fas fa-arrow-left me-2"></i>
+        Volver a Conceptos
+    </a>
 
-            <!-- Cuerpo del concepto -->
-            <div class="concept-body">
-                <!-- Botón de regreso -->
-                <a href="#" onclick="window.history.back();" class="btn-back">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Volver Atrás
-                </a>
+    <!-- Header del concepto -->
+    <div class="header-title">
+        <h1>Concepto No {{ $concept->titulo }} del {{ $concept->año }}</h1>
+        <p class="header-subtitle mb-0">{{ $concept->tipo_documento }} - {{ $concept->conceptType->nombre }}</p>
+    </div>
 
-                <div class="row">
-                    <!-- Columna izquierda - Información del concepto -->
-                    <div class="col-lg-5">
-                        <div class="left-column">
-                            <!-- Sección de metadatos -->
-                            <h3 class="section-title">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Información del Concepto
-                            </h3>
-                            
-                            <!-- Tipo de documento y año -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-file-contract"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Tipo de Documento</div>
-                                        <div class="metadata-value">{{ $concept->tipo_documento }}</div>
-                                    </div>
-                                </div>
+    <div class="row">
+        <!-- Columna izquierda - Vista previa del documento (8 columnas) -->
+        <div class="col-lg-8 mb-4">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa del Documento
+                </div>
+                <div class="preview-container">
+                    @if(pathinfo($concept->archivo, PATHINFO_EXTENSION) == 'pdf')
+                        <iframe src="{{ asset('storage/' . $concept->archivo) }}" 
+                                class="preview-iframe">
+                        </iframe>
+                    @else
+                        <div class="no-preview">
+                            <div class="no-preview-icon">
+                                <i class="fas fa-file-download"></i>
                             </div>
-
-                            <!-- Año -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-calendar-year"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Año</div>
-                                        <div class="metadata-value">{{ $concept->año }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fecha de expedición -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Fecha de expedición</div>
-                                        <div class="metadata-value">
-                                            {{ \Carbon\Carbon::parse($concept->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tipo de concepto -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-tags"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Tipo de Concepto</div>
-                                        <div class="metadata-value">{{ $concept->conceptType->nombre }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tema -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-bookmark"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Tema</div>
-                                        <div class="metadata-value">{{ $concept->conceptTheme->nombre }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fecha de creación -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-plus-circle"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Fecha de creación</div>
-                                        <div class="metadata-value">{{ $concept->created_at }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Última modificación -->
-                            <div class="metadata-item mb-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Última modificación</div>
-                                        <div class="metadata-value">{{ $concept->updated_at }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botones de acción -->
-                            <div class="action-buttons flex-column">
-                                <a href="{{ asset('storage/' . $concept->archivo) }}" 
-                                   target="_blank" 
-                                   class="btn-primary-custom mb-3 text-center">
-                                    <i class="fas fa-external-link-alt me-2"></i>
-                                    Abrir en Nueva Pestaña
-                                </a>
-                                
-                                <a href="{{ asset('storage/' . $concept->archivo) }}" 
-                                   download 
-                                   class="btn-outline-custom text-center">
-                                    <i class="fas fa-download me-2"></i>
-                                    Descargar Archivo
-                                </a>
-                            </div>
+                            <h5 style="color: #43883d; font-weight: 600;">Archivo no visualizable en línea</h5>
+                            <p class="mb-0">Solo los archivos PDF pueden visualizarse directamente. Descargue el archivo para abrirlo en su aplicación correspondiente.</p>
                         </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Contenido del concepto -->
+            @if($concept->contenido)
+            <div class="content-card">
+                <h5 class="text-success fw-bold mb-3">
+                    <i class="fas fa-align-left me-2"></i>
+                    Contenido del Concepto
+                </h5>
+                <div class="content-text">
+                    {!! nl2br(e($concept->contenido)) !!}
+                </div>
+            </div>
+            @endif
+
+            <!-- Tarjeta de Acciones movida aquí -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-cog me-2"></i>
+                    Acciones Disponibles
+                </div>
+                <div class="info-card-body">
+                    <a href="{{ asset('storage/' . $concept->archivo) }}" 
+                       target="_blank" 
+                       class="btn-action">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        Abrir en Nueva Pestaña
+                    </a>
+                    
+                    <a href="{{ asset('storage/' . $concept->archivo) }}" 
+                       download 
+                       class="btn-outline-action">
+                        <i class="fas fa-download me-2"></i>
+                        Descargar Archivo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha - Información en tarjetas (4 columnas) -->
+        <div class="col-lg-4">
+            <!-- Tarjeta de Información General -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información General
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-file-contract me-2"></i>
+                            Tipo de Documento
+                        </div>
+                        <div class="metadata-value">{{ $concept->tipo_documento }}</div>
                     </div>
 
-                    <!-- Columna derecha - Contenido y vista previa -->
-                    <div class="col-lg-7">
-                        <div class="right-column">
-                            <!-- Contenido del concepto -->
-                            <div class="content-section mb-4">
-                                <h3 class="section-title">
-                                    <i class="fas fa-align-left me-2"></i>
-                                    Contenido del Concepto
-                                </h3>
-                                <div class="content-text">
-                                    {!! nl2br(e($concept->contenido)) !!}
-                                </div>
-                            </div>
-
-                            <!-- Vista previa -->
-                            <h3 class="section-title">
-                                <i class="fas fa-eye me-2"></i>
-                                Vista Previa del Documento
-                            </h3>
-                            
-                            <div class="preview-container">
-                                @if(pathinfo($concept->archivo, PATHINFO_EXTENSION) == 'pdf')
-                                    <iframe src="{{ asset('storage/' . $concept->archivo) }}" 
-                                            class="preview-iframe">
-                                    </iframe>
-                                @else
-                                    <div class="no-preview">
-                                        <div class="no-preview-icon">
-                                            <i class="fas fa-file-download"></i>
-                                        </div>
-                                        <h5 style="color: #285F19; font-weight: 600;">Archivo no visualizable en línea</h5>
-                                        <p class="mb-0">Solo los archivos PDF pueden visualizarse directamente. Descargue el archivo para abrirlo en su aplicación correspondiente.</p>
-                                    </div>
-                                @endif
-                            </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-calendar-year me-2"></i>
+                            Año
                         </div>
+                        <div class="metadata-value">{{ $concept->año }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-hashtag me-2"></i>
+                            Número
+                        </div>
+                        <div class="metadata-value">{{ $concept->titulo }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Fecha de Expedición
+                        </div>
+                        <div class="metadata-value">{{ \Carbon\Carbon::parse($concept->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Footer del concepto -->
-            <div class="concept-footer">
-                <p class="footer-text">
-                    <i class="fas fa-gavel me-1"></i>
-                    Concepto jurídico oficial expedido por la Alcaldía de Bucaramanga
-                </p>
+            <!-- Tarjeta de Clasificación -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-tags me-2"></i>
+                    Clasificación
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-folder me-2"></i>
+                            Tipo de Concepto
+                        </div>
+                        <div class="metadata-value">{{ $concept->conceptType->nombre }}</div>
+                    </div>
+
+                    @if($concept->conceptTheme)
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-bookmark me-2"></i>
+                            Tema Específico
+                        </div>
+                        <div class="metadata-value">{{ $concept->conceptTheme->nombre }}</div>
+                    </div>
+                    @endif
+
+                    @if($concept->dependencia)
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-building me-2"></i>
+                            Dependencia
+                        </div>
+                        <div class="metadata-value">{{ $concept->dependencia }}</div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Tarjeta de Fechas -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-clock me-2"></i>
+                    Información Temporal
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Fecha de Creación
+                        </div>
+                        <div class="metadata-value">{{ $concept->created_at->translatedFormat('d \d\e F \d\e\l Y') }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-edit me-2"></i>
+                            Última Modificación
+                        </div>
+                        <div class="metadata-value">{{ $concept->updated_at->translatedFormat('d \d\e F \d\e\l Y') }}</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
