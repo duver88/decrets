@@ -152,6 +152,35 @@
             box-shadow: none;
         }
 
+        /* Solo CSS mínimo para complementar Bootstrap */
+.card {
+    transition: all 0.3s ease !important;
+}
+
+.stretched-link:hover {
+    transition: color 0.3s ease;
+}
+
+/* Responsive adicional para móviles pequeños */
+@media (max-width: 576px) {
+    .badge {
+        font-size: 0.75rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .gap-3 {
+        gap: 0.75rem !important;
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+}
+
         /* Responsive para móviles */
         @media (max-width: 576px) {
             .pagination-container {
@@ -655,94 +684,144 @@
         @endif
 
         <!-- Listado de documentos -->
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-            @if($documents->count() > 0)
-                @foreach($documents as $document)
-                    @php
-                    $extension = strtolower(pathinfo($document->archivo, PATHINFO_EXTENSION));
-                    $iconClass = '';
-                    $icon = '';
-            
-                    if ($extension == 'pdf') {
-                        $iconClass = 'text-danger';
-                        $icon = '<i class="fas fa-file-pdf fa-2x"></i>';
-                    } elseif (in_array($extension, ['doc', 'docx'])) {
-                        $iconClass = 'text-primary';
-                        $icon = '<i class="fas fa-file-word fa-2x"></i>';
-                    } elseif (in_array($extension, ['xls', 'xlsx'])) {
-                        $iconClass = 'text-success';
-                        $icon = '<i class="fas fa-file-excel fa-2x"></i>';
-                    } else {
-                        $iconClass = 'text-secondary';
-                        $icon = '<i class="fas fa-file-alt fa-2x"></i>';
-                    }
-                    @endphp
-            
-                    <article class="col">
-                        <div class="card h-100 shadow rounded overflow-hidden transition-all hover:shadow-lg" 
-                             style="transition: all 0.3s ease; background-color: #f9f9f9;">
-                            <div class="d-flex align-items-center p-3 gap-3">
-                                <div class="flex-shrink-0 text-center" style="width: 70px;">
-                                    <div class="{{ $iconClass }}">
-                                        {!! $icon !!}
-                                    </div>
-                                    <span class="visually-hidden">{{ strtoupper($extension) }} archivo</span>
-                                </div>
-            
-                                <div class="flex-grow-1">
-                                    <h3 class="h6 mb-2">
-                                        <a href="{{ asset('storage/' . $document->archivo) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold" style="color: #43883d;">
-                                            {{ ucfirst($document->tipo) }}: No {{ $document->numero }} de {{ $document->nombre }}
-                                        </a>
-                                    </h3>
-                                    <p class="text-muted small mb-2">{{ Str::limit($document->descripcion, 110) }}</p>
-                                    <div class="d-flex align-items-center gap-3 mb-3 text-muted small">
-                                        <div class="d-flex align-items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                                            </svg>
-                                            {{ $document->created_at->diffForHumans() }}
-                                        </div>
-                                        <div class="d-flex align-items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                                            </svg>
-                                            {{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                                        <a href="{{ route('document.show', $document->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background-color: #43883d; color: white;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                            </svg>
-                                            Ver / Descargar
-                                        </a>
-                                    </div>
-                                </div>
+<!-- Listado de documentos con Bootstrap puro -->
+<div class="row g-3">
+    @if($documents->count() > 0)
+        @foreach($documents as $document)
+            @php
+            $extension = strtolower(pathinfo($document->archivo, PATHINFO_EXTENSION));
+            $iconClass = '';
+            $bgClass = '';
+            $textClass = '';
+            $icon = '';
+    
+            if ($extension == 'pdf') {
+                $iconClass = 'text-danger';
+                $bgClass = 'bg-danger bg-opacity-10';
+                $textClass = 'text-danger';
+                $icon = '<i class="fas fa-file-pdf"></i>';
+            } elseif (in_array($extension, ['doc', 'docx'])) {
+                $iconClass = 'text-primary';
+                $bgClass = 'bg-primary bg-opacity-10';
+                $textClass = 'text-primary';
+                $icon = '<i class="fas fa-file-word"></i>';
+            } elseif (in_array($extension, ['xls', 'xlsx'])) {
+                $iconClass = 'text-success';
+                $bgClass = 'bg-success bg-opacity-10';
+                $textClass = 'text-success';
+                $icon = '<i class="fas fa-file-excel"></i>';
+            } else {
+                $iconClass = 'text-secondary';
+                $bgClass = 'bg-secondary bg-opacity-10';
+                $textClass = 'text-secondary';
+                $icon = '<i class="fas fa-file-alt"></i>';
+            }
+            @endphp
+    
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 border border-2 border-light shadow-sm" style="border-radius: 12px; transition: all 0.3s ease;" 
+                     onmouseover="this.style.transform='translateY(-3px)'; this.classList.add('shadow');" 
+                     onmouseout="this.style.transform='translateY(0)'; this.classList.remove('shadow');">
+                    
+                    <div class="card-body p-4">
+                        
+                        <!-- Badges superiores -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge text-white fw-semibold px-3 py-2 rounded-pill" style="background-color: #2d6a2f; font-size: 0.85rem;">
+                                {{ ucfirst($document->tipo) }}
+                            </span>
+                            <span class="badge bg-secondary text-white fw-semibold px-3 py-2 rounded-pill" style="font-size: 0.85rem;">
+                                {{ \Carbon\Carbon::parse($document->fecha)->format('Y') }}
+                            </span>
+                            
+                            @if($document->category)
+                                <span class="badge bg-primary text-white fw-semibold px-3 py-2 rounded-pill" style="font-size: 0.85rem;">
+                                    {{ Str::limit($document->category->nombre, 15) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <!-- Contenido principal con ícono y título -->
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="flex-shrink-0 {{ $bgClass }} rounded d-flex align-items-center justify-content-center" 
+                                 style="width: 48px; height: 48px;">
+                                <span class="{{ $iconClass }}" style="font-size: 1.5rem;">
+                                    {!! $icon !!}
+                                </span>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <h5 class="card-title mb-2 fw-bold text-dark lh-sm" style="font-size: 1.1rem;">
+                                    <a href="{{ route('document.show', $document->id) }}" 
+                                       class="text-decoration-none text-dark stretched-link"
+                                       onmouseover="this.classList.add('text-success');" 
+                                       onmouseout="this.classList.remove('text-success');">
+                                        {{ ucfirst($document->tipo) }}: No {{ $document->numero }} de {{ $document->nombre }}
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted mb-0 small">
+                                    {{ Str::limit($document->descripcion, 50) }}
+                                </p>
                             </div>
                         </div>
-                    </article>
-                    
-                @endforeach
-                
-            @else
-                <div class="col-12 text-center py-5">
-                    <div style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">
-                        <i class="fas fa-gavel"></i>
+
+                        <!-- Información de fecha -->
+                        <div class="d-flex flex-wrap gap-3 mb-3 small text-muted">
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="fas fa-calendar text-primary"></i>
+                                <span>{{ \Carbon\Carbon::parse($document->fecha)->format('d \d\e F \d\e\l Y') }}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="fas fa-clock text-primary"></i>
+                                <span>{{ $document->created_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Botón Ver / Descargar -->
+                        <div class="d-grid">
+                            <a href="{{ asset('storage/' . $document->archivo) }}" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="btn text-white fw-bold py-2 rounded-2"
+                               style="background-color: #2d6a2f; transition: background-color 0.3s ease;"
+                               onmouseover="this.style.backgroundColor='#1f4e21';" 
+                               onmouseout="this.style.backgroundColor='#2d6a2f';">
+                                Ver / Descargar
+                            </a>
+                        </div>
+
                     </div>
-                    <h3>No hay documentos disponibles</h3>
-                    <p class="text-muted mt-3">
+                </div>
+            </div>
+        @endforeach
+    @else
+        <!-- Estado vacío -->
+        <div class="col-12">
+            <div class="card border border-2 border-light shadow-sm bg-light" style="border-radius: 12px;">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-gavel text-muted opacity-25" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-success fw-bold mb-3">No hay documentos disponibles</h4>
+                    <p class="text-muted mb-4">
                         @if(request()->hasAny(['busqueda_general', 'category_id', 'tipo', 'nombre', 'numero', 'año', 'mes', 'fecha', 'fecha_desde', 'fecha_hasta']))
-                            No se encontraron documentos que coincidan con los filtros aplicados. 
-                            <a href="{{ route('home') }}" class="text-decoration-none" style="color: #43883d;">Limpiar filtros</a>
+                            No se encontraron documentos que coincidan con los filtros aplicados.
                         @else
-                            Utilice los filtros para buscar documentos o intente más tarde.
+                            Utilice los filtros de búsqueda para encontrar documentos específicos.
                         @endif
                     </p>
+                    @if(request()->hasAny(['busqueda_general', 'category_id', 'tipo', 'nombre', 'numero', 'año', 'mes', 'fecha', 'fecha_desde', 'fecha_hasta']))
+                        <a href="{{ route('home') }}" class="btn btn-outline-success">
+                            <i class="fas fa-refresh me-2"></i>
+                            Limpiar Filtros
+                        </a>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
+    @endif
+</div>
+
+
 
         <!-- SECCIÓN DE PAGINACIÓN MEJORADA -->
         @if($documents->hasPages())

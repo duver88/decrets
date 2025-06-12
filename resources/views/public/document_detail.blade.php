@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documento - Alcaldía de Bucaramanga</title>
-    <link rel="stylesheet" href="{{ asset('css/documentsDetails.css')}}">
-    <link rel="stylesheet" href="{{ asset('css/cabecera.css') }}">   
+    <title>Documentos | {{ ucfirst($document->tipo) }} N° {{ $document->numero }}</title>
+     <link rel="stylesheet" href="{{ asset('css/cabecera.css') }}">   
+    <link rel="stylesheet" href="{{ asset('css/conceptsDetails.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&display=swap" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> 
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<style>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-</style>
 </head>
 <body>
         {{-- Header --}}
@@ -108,162 +107,235 @@
             </nav>
         </div>
     </header>
-    {{-- Fin Header --}}
     <br>
-    <div class="container-fluid">
-        <div class="document-container">
-            <!-- Badge de seguridad -->
-            <div class="security-badge">
-                <i class="fas fa-shield-check me-1"></i>
-                Documento Oficial
-            </div>
+    {{-- Fin Header --}}
 
-            <!-- Header del documento -->
-            <div class="document-header">
-                <h1 class="text-uppercase">
-                    {{ ucfirst($document->tipo) }} N° {{ $document->numero }}
-                </h1>
-                <p class="subtitle mb-0">{{ $document->nombre }}</p>
-            </div>
+<div class="concept-container">
+    <!-- Botón de regreso -->
+    <a href="{{ route('home') }}" class="back-btn">
+        <i class="fas fa-arrow-left me-2"></i>
+        Volver a Documentos
+    </a>
 
-            <!-- Cuerpo del documento -->
-            <div class="document-body">
-                <!-- Botón de regreso -->
-                <a href="#" onclick="window.history.back();" class="btn-back">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Volver Atrás
-                </a>
+    <!-- Header del documento -->
+    <div class="header-title">
+        <h1>{{ ucfirst($document->tipo) }} N° {{ $document->numero }}</h1>
+        <p class="header-subtitle mb-0">{{ $document->nombre }} - {{ $document->category->nombre }}</p>
+    </div>
 
-                <div class="row">
-                    <!-- Columna izquierda - Información del documento -->
-                    <div class="col-lg-5">
-                        <div class="left-column">
-                            <!-- Sección de metadatos -->
-                            <h3 class="section-title">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Información del Documento
-                            </h3>
-                            
-                            <!-- Fecha de expedición -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Fecha de expedición</div>
-                                        <div class="metadata-value">
-                                            {{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}
-                                        </div>
-                                    </div>
-                                </div>
+    <div class="row">
+        <!-- Columna izquierda - Vista previa del documento (8 columnas) -->
+        <div class="col-lg-8 mb-4">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa del Documento
+                </div>
+                <div class="preview-container">
+                    @if(pathinfo($document->archivo, PATHINFO_EXTENSION) == 'pdf')
+                        <iframe src="{{ asset('storage/' . $document->archivo) }}" 
+                                class="preview-iframe">
+                        </iframe>
+                    @else
+                        <div class="no-preview">
+                            <div class="no-preview-icon">
+                                <i class="fas fa-file-download"></i>
                             </div>
-
-                            <!-- Categoría -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-folder-open"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Categoría</div>
-                                        <div class="metadata-value">{{ $document->category->nombre }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fecha de creación -->
-                            <div class="metadata-item mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-plus-circle"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Fecha de creación</div>
-                                        <div class="metadata-value">{{ $document->created_at }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Última modificación -->
-                            <div class="metadata-item mb-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="metadata-icon me-3">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="metadata-label">Última modificación</div>
-                                        <div class="metadata-value">{{ $document->updated_at }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Descripción del documento -->
-                            <div class="description-section mb-4">
-                                <h4 class="section-title">
-                                    <i class="fas fa-align-left me-2"></i>
-                                    Descripción
-                                </h4>
-                                <p class="description-text">{{ $document->descripcion }}</p>
-                            </div>
-
-                            <!-- Botones de acción -->
-                            <div class="action-buttons flex-column">
-                                <a href="{{ asset('storage/' . $document->archivo) }}" 
-                                   target="_blank" 
-                                   class="btn-primary-custom mb-3 text-center">
-                                    <i class="fas fa-external-link-alt me-2"></i>
-                                    Abrir en Nueva Pestaña
-                                </a>
-                                
-                                <a href="{{ asset('storage/' . $document->archivo) }}" 
-                                   download 
-                                   class="btn-outline-custom text-center">
-                                    <i class="fas fa-download me-2"></i>
-                                    Descargar Archivo
-                                </a>
-                            </div>
+                            <h5 style="color: #43883d; font-weight: 600;">Archivo no visualizable en línea</h5>
+                            <p class="mb-0">Solo los archivos PDF pueden visualizarse directamente. Descargue el archivo para abrirlo en su aplicación correspondiente.</p>
                         </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Descripción del documento -->
+            @if($document->descripcion)
+            <div class="content-card">
+                <h5 class="text-success fw-bold mb-3">
+                    <i class="fas fa-align-left me-2"></i>
+                    Descripción del Documento
+                </h5>
+                <div class="content-text">
+                    {!! nl2br(e($document->descripcion)) !!}
+                </div>
+            </div>
+            @endif
+
+            <!-- Tarjeta de Acciones movida aquí -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-cog me-2"></i>
+                    Acciones Disponibles
+                </div>
+                <div class="info-card-body">
+                    <a href="{{ asset('storage/' . $document->archivo) }}" 
+                       target="_blank" 
+                       class="btn-action">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        Abrir en Nueva Pestaña
+                    </a>
+                    
+                    <a href="{{ asset('storage/' . $document->archivo) }}" 
+                       download 
+                       class="btn-outline-action">
+                        <i class="fas fa-download me-2"></i>
+                        Descargar Archivo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha - Información en tarjetas (4 columnas) -->
+        <div class="col-lg-4">
+            <!-- Tarjeta de Información General -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información General
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-file-contract me-2"></i>
+                            Tipo de Documento
+                        </div>
+                        <div class="metadata-value">{{ ucfirst($document->tipo) }}</div>
                     </div>
 
-                    <!-- Columna derecha - Vista previa -->
-                    <div class="col-lg-7">
-                        <div class="right-column">
-                            <h3 class="section-title">
-                                <i class="fas fa-eye me-2"></i>
-                                Vista Previa del Documento
-                            </h3>
-                            
-                            <div class="preview-container">
-                                @if(pathinfo($document->archivo, PATHINFO_EXTENSION) == 'pdf')
-                                    <iframe src="{{ asset('storage/' . $document->archivo) }}" 
-                                            class="preview-iframe">
-                                    </iframe>
-                                @else
-                                    <div class="no-preview">
-                                        <div class="no-preview-icon">
-                                            <i class="fas fa-file-download"></i>
-                                        </div>
-                                        <h5 style="color: #285F19; font-weight: 600;">Archivo no visualizable en línea</h5>
-                                        <p class="mb-0">Solo los archivos PDF pueden visualizarse directamente. Descargue el archivo para abrirlo en su aplicación correspondiente.</p>
-                                    </div>
-                                @endif
-                            </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-hashtag me-2"></i>
+                            Número
                         </div>
+                        <div class="metadata-value">{{ $document->numero }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-signature me-2"></i>
+                            Nombre del Documento
+                        </div>
+                        <div class="metadata-value">{{ $document->nombre }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Fecha de Expedición
+                        </div>
+                        <div class="metadata-value">{{ \Carbon\Carbon::parse($document->fecha)->translatedFormat('d \d\e F \d\e\l Y') }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Footer del documento -->
-            <div class="document-footer">
-                <p class="footer-text">
-                    <i class="fas fa-shield-alt me-1"></i>
-                    Documento oficial expedido por la Alcaldía de Bucaramanga
-                </p>
+            <!-- Tarjeta de Clasificación -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-tags me-2"></i>
+                    Clasificación
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-folder me-2"></i>
+                            Categoría
+                        </div>
+                        <div class="metadata-value">{{ $document->category->nombre }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Tipo de Archivo
+                        </div>
+                        <div class="metadata-value">{{ strtoupper(pathinfo($document->archivo, PATHINFO_EXTENSION)) }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-calendar-year me-2"></i>
+                            Año de Expedición
+                        </div>
+                        <div class="metadata-value">{{ \Carbon\Carbon::parse($document->fecha)->format('Y') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Fechas -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-clock me-2"></i>
+                    Información Temporal
+                </div>
+                <div class="info-card-body">
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Fecha de Creación
+                        </div>
+                        <div class="metadata-value">{{ $document->created_at->translatedFormat('d \d\e F \d\e\l Y') }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-edit me-2"></i>
+                            Última Modificación
+                        </div>
+                        <div class="metadata-value">{{ $document->updated_at->translatedFormat('d \d\e F \d\e\l Y') }}</div>
+                    </div>
+
+                    <div class="metadata-item">
+                        <div class="metadata-label">
+                            <i class="fas fa-eye me-2"></i>
+                            Tiempo Transcurrido
+                        </div>
+                        <div class="metadata-value">{{ $document->created_at->diffForHumans() }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Badge de Seguridad (nueva) -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-shield-check me-2"></i>
+                    Verificación
+                </div>
+                <div class="info-card-body">
+                    <div class="text-center">
+                        <div class="security-badge-large mb-3">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h6 class="text-success fw-bold mb-2">Documento Oficial</h6>
+                        <p class="text-muted small mb-0">
+                            Documento oficial expedido por la Alcaldía de Bucaramanga
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- CSS adicional para el badge de seguridad -->
+<style>
+.security-badge-large {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #43883d, #2d6a2f);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(67, 136, 61, 0.3);
+}
+
+.security-badge-large i {
+    color: white;
+    font-size: 1.5rem;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
