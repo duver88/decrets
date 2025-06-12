@@ -213,7 +213,7 @@
                     <div class="metadata-item">
                         <div class="metadata-label">
                             <i class="fas fa-signature me-2"></i>
-                            Nombre del Documento
+                            Año 
                         </div>
                         <div class="metadata-value">{{ $document->nombre }}</div>
                     </div>
