@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Document;
 use App\Models\Category;
+use App\Models\Document;
+use App\Models\DocumentType;
 use Illuminate\Http\Request;
+use App\Models\DocumentTheme;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
@@ -82,6 +84,15 @@ class DocumentController extends Controller
                   ->orWhere('tipo', 'LIKE', "%{$busqueda}%");
             });
         }
+
+        if ($request->filled('document_type_id')) {  
+            $query->where('document_type_id', $request->document_type_id);  
+        }  
+        
+        // Filtro por tema específico  
+        if ($request->filled('document_theme_id')) {  
+            $query->where('document_theme_id', $request->document_theme_id);  
+        }  
 
         // Ordenamiento mejorado
         $orden = $request->get('orden', 'fecha_desc');
@@ -321,12 +332,15 @@ public function index(Request $request)
         'ultimos_30_dias' => Document::where('fecha', '>=', now()->subDays(30))->count(),
     ];
 
+    $documentTypes = DocumentType::orderBy('nombre')->get();  
+    $documentThemes = DocumentTheme::with('documentType')->orderBy('nombre')->get();  
+
     return view('admin.dashboard', compact(
         'documents', 
         'categories', 
         'tipos', 
         'años', 
-        'stats'
+        'stats','documentTypes', 'documentThemes'
     ));
 }
 
@@ -508,6 +522,12 @@ public function index(Request $request)
     })->orderBy('fecha', 'desc')->get();  
       
     return view('users.dashboard', compact('documents'));  
+}
+
+public function getThemes($typeId)  
+{  
+    $themes = DocumentTheme::where('document_type_id', $typeId)->get();  
+    return response()->json($themes);  
 }
 }
 

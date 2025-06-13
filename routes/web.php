@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ConceptTypeController;
 use App\Http\Controllers\ConceptThemeController;
+use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\DocumentThemeController;
 use App\Http\Controllers\ConceptPermissionController;
 use App\Http\Controllers\UserCategoryPermissionController;  
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -63,6 +65,16 @@ Route::middleware(['auth', IsAdmin::class])->group(function () {
     Route::get('/dashboard/categorias', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/dashboard/categorias', [CategoryController::class, 'store'])->name('category.store');
     Route::delete('/dashboard/categorias/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
+
+    // Nuevas rutas para tipos y temas de documentos  
+    Route::get('/dashboard/document-categories', [DocumentTypeController::class, 'index'])->name('documents.categories');  
+    Route::post('/dashboard/document-categories/types', [DocumentTypeController::class, 'store'])->name('documents.storeType');  
+    Route::post('/dashboard/document-categories/themes', [DocumentThemeController::class, 'store'])->name('documents.storeTheme');  
+    Route::delete('/dashboard/document-categories/types/{id}', [DocumentTypeController::class, 'destroy'])->name('documents.destroyType');  
+    Route::delete('/dashboard/document-categories/themes/{id}', [DocumentThemeController::class, 'destroy'])->name('documents.destroyTheme');  
+
+    // Ruta AJAX para obtener temas  
+    Route::get('/dashboard/document-themes/{typeId}', [DocumentController::class, 'getThemes'])->name('documents.getThemes');  
 });
 
 // Rutas de autenticación
